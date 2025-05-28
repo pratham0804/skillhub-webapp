@@ -157,4 +157,25 @@ tests/
 __tests__/
 
 # Documentation build
-docs/build/ 
+docs/build/
+
+# ===== GOOGLE CREDENTIALS AND SENSITIVE FILES =====
+# Google Service Account credentials
+credentials.json
+**/credentials.json
+backend/credentials.json
+
+# Firebase credentials
+firebase-adminsdk*.json
+serviceAccountKey.json
+
+# AWS credentials
+.aws/
+
+# Other sensitive files
+secrets.json
+private-key.json
+service-account.json
+
+# API Keys file
+api-keys.json 
