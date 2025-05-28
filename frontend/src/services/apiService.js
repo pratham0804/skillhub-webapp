@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Configure axios for API requests
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || '/api',
+  baseURL: 'https://skillhub-backend-97uq.onrender.com/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
