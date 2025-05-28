@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminContributions.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+const API_URL = 'https://skillhub-backend-97uq.onrender.com/api';
 
 // Add a local storage utility for contributions
 const localContributionStorage = {

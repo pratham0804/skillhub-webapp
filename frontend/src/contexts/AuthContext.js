@@ -56,27 +56,27 @@ export const AuthProvider = ({ children }) => {
   // Set up API client - use useMemo to prevent recreation on every render
   const api = useMemo(() => {
     const client = axios.create({
-      baseURL: process.env.REACT_APP_API_BASE_URL || '/api',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+      baseURL: 'https://skillhub-backend-97uq.onrender.com/api',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       withCredentials: true,
       timeout: 30000 // 30 second timeout (increased for file operations)
-  });
+    });
 
     // Add response interceptor for error handling
     client.interceptors.response.use(response => {
-    return response;
-  }, error => {
-    if (error.response) {
+      return response;
+    }, error => {
+      if (error.response) {
         console.error(`API Error: ${error.response.status}`, error.response.data);
-    } else if (error.request) {
+      } else if (error.request) {
         console.error('Network Error: No response received');
-    } else {
-      console.error('API Error:', error.message);
-    }
-    return Promise.reject(error);
-  });
+      } else {
+        console.error('API Error:', error.message);
+      }
+      return Promise.reject(error);
+    });
 
     return client;
   }, []); // Empty dependency array - create once
