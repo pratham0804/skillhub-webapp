@@ -1,0 +1,31 @@
+skillId,skillName,category,subcategory,demandLevel,growthRate,averageSalary,salaryGrowth,industryRank,requiredExperience,region,industryVertical,timelineData,dateUpdated
+S001,Machine Learning,AI & ML,Machine Learning,Very High,35%,$150000,8%,1,Intermediate,Global,Technology,"[{""q1_2023"":12},{""q2_2023"":15},{""q3_2023"":19},{""q4_2023"":24},{""q1_2024"":30}]",2024-06-01
+S002,React.js,Frontend Development,JavaScript Framework,Very High,28%,$135000,5%,2,Intermediate,Global,Technology,"[{""q1_2023"":45},{""q2_2023"":50},{""q3_2023"":58},{""q4_2023"":62},{""q1_2024"":68}]",2024-06-01
+S003,Python,Programming Languages,General Purpose,Very High,15%,$130000,4%,3,Beginner,Global,Technology,"[{""q1_2023"":70},{""q2_2023"":75},{""q3_2023"":78},{""q4_2023"":82},{""q1_2024"":85}]",2024-06-01
+S004,Cloud Architecture,Cloud Computing,Architecture,High,20%,$145000,7%,4,Advanced,Global,Technology,"[{""q1_2023"":30},{""q2_2023"":35},{""q3_2023"":42},{""q4_2023"":48},{""q1_2024"":55}]",2024-06-01
+S005,Data Engineering,Data,Data Pipeline,High,25%,$140000,6%,5,Intermediate,Global,Technology,"[{""q1_2023"":25},{""q2_2023"":30},{""q3_2023"":38},{""q4_2023"":45},{""q1_2024"":52}]",2024-06-01
+S006,DevOps,DevOps,CI/CD,High,18%,$135000,5%,6,Intermediate,Global,Technology,"[{""q1_2023"":35},{""q2_2023"":40},{""q3_2023"":46},{""q4_2023"":52},{""q1_2024"":58}]",2024-06-01
+S007,TypeScript,Programming Languages,Typed JavaScript,High,22%,$130000,5%,7,Intermediate,Global,Technology,"[{""q1_2023"":38},{""q2_2023"":44},{""q3_2023"":52},{""q4_2023"":58},{""q1_2024"":65}]",2024-06-01
+S008,Kubernetes,DevOps,Container Orchestration,High,28%,$140000,6%,8,Advanced,Global,Technology,"[{""q1_2023"":28},{""q2_2023"":35},{""q3_2023"":45},{""q4_2023"":52},{""q1_2024"":60}]",2024-06-01
+S009,Node.js,Backend Development,JavaScript Runtime,Medium,12%,$125000,4%,9,Intermediate,Global,Technology,"[{""q1_2023"":42},{""q2_2023"":45},{""q3_2023"":48},{""q4_2023"":50},{""q1_2024"":53}]",2024-06-01
+S010,Natural Language Processing,AI & ML,NLP,Very High,40%,$155000,9%,10,Advanced,Global,Technology,"[{""q1_2023"":15},{""q2_2023"":22},{""q3_2023"":32},{""q4_2023"":42},{""q1_2024"":52}]",2024-06-01
+S011,AWS,Cloud Computing,Cloud Platform,High,15%,$135000,5%,11,Intermediate,Global,Technology,"[{""q1_2023"":60},{""q2_2023"":65},{""q3_2023"":68},{""q4_2023"":72},{""q1_2024"":75}]",2024-06-01
+S012,Docker,DevOps,Containerization,Medium,10%,$125000,3%,12,Intermediate,Global,Technology,"[{""q1_2023"":50},{""q2_2023"":53},{""q3_2023"":56},{""q4_2023"":58},{""q1_2024"":60}]",2024-06-01
+S013,GraphQL,API,Query Language,Medium,20%,$130000,6%,13,Intermediate,Global,Technology,"[{""q1_2023"":20},{""q2_2023"":25},{""q3_2023"":32},{""q4_2023"":38},{""q1_2024"":45}]",2024-06-01
+S014,TensorFlow,AI & ML,ML Framework,High,30%,$145000,7%,14,Advanced,Global,Technology,"[{""q1_2023"":18},{""q2_2023"":24},{""q3_2023"":32},{""q4_2023"":40},{""q1_2024"":48}]",2024-06-01
+S015,SQL,Data,Database Query,Medium,5%,$115000,2%,15,Beginner,Global,Technology,"[{""q1_2023"":75},{""q2_2023"":77},{""q3_2023"":78},{""q4_2023"":79},{""q1_2024"":80}]",2024-06-01
+S016,UI/UX Design,Design,User Experience,Medium,15%,$120000,5%,16,Intermediate,Global,Technology,"[{""q1_2023"":35},{""q2_2023"":38},{""q3_2023"":42},{""q4_2023"":46},{""q1_2024"":50}]",2024-06-01
+S017,Blockchain,Blockchain,DLT,Medium,18%,$140000,8%,17,Advanced,Global,Technology,"[{""q1_2023"":15},{""q2_2023"":18},{""q3_2023"":22},{""q4_2023"":25},{""q1_2024"":28}]",2024-06-01
+S018,Angular,Frontend Development,JavaScript Framework,Medium,8%,$125000,3%,18,Intermediate,Global,Technology,"[{""q1_2023"":30},{""q2_2023"":32},{""q3_2023"":33},{""q4_2023"":34},{""q1_2024"":35}]",2024-06-01
+S019,Vue.js,Frontend Development,JavaScript Framework,Medium,15%,$120000,5%,19,Intermediate,Global,Technology,"[{""q1_2023"":25},{""q2_2023"":28},{""q3_2023"":32},{""q4_2023"":35},{""q1_2024"":38}]",2024-06-01
+S020,Cybersecurity,Security,Network Security,Very High,25%,$140000,7%,20,Advanced,Global,Technology,"[{""q1_2023"":40},{""q2_2023"":45},{""q3_2023"":52},{""q4_2023"":58},{""q1_2024"":65}]",2024-06-01
+S021,Machine Learning,AI & ML,Machine Learning,Very High,32%,$155000,9%,1,Intermediate,North America,Technology,"[{""q1_2023"":14},{""q2_2023"":18},{""q3_2023"":24},{""q4_2023"":30},{""q1_2024"":36}]",2024-06-01
+S022,Machine Learning,AI & ML,Machine Learning,High,30%,$130000,7%,3,Intermediate,Europe,Technology,"[{""q1_2023"":10},{""q2_2023"":14},{""q3_2023"":18},{""q4_2023"":23},{""q1_2024"":28}]",2024-06-01
+S023,Machine Learning,AI & ML,Machine Learning,High,38%,$140000,8%,2,Intermediate,Asia,Technology,"[{""q1_2023"":13},{""q2_2023"":19},{""q3_2023"":26},{""q4_2023"":34},{""q1_2024"":42}]",2024-06-01
+S024,Java,Programming Languages,Object Oriented,Medium,5%,$125000,3%,25,Intermediate,Global,Technology,"[{""q1_2023"":55},{""q2_2023"":56},{""q3_2023"":57},{""q4_2023"":58},{""q1_2024"":59}]",2024-06-01
+S025,Go,Programming Languages,Systems Programming,High,22%,$135000,6%,22,Intermediate,Global,Technology,"[{""q1_2023"":15},{""q2_2023"":19},{""q3_2023"":24},{""q4_2023"":28},{""q1_2024"":32}]",2024-06-01
+S026,Cybersecurity,Security,Network Security,Very High,28%,$150000,8%,5,Advanced,North America,Finance,"[{""q1_2023"":45},{""q2_2023"":52},{""q3_2023"":60},{""q4_2023"":68},{""q1_2024"":75}]",2024-06-01
+S027,Data Science,Data,Analytics,High,20%,$135000,6%,12,Intermediate,Europe,Healthcare,"[{""q1_2023"":30},{""q2_2023"":35},{""q3_2023"":42},{""q4_2023"":48},{""q1_2024"":54}]",2024-06-01
+S028,Cloud Architecture,Cloud Computing,Architecture,High,23%,$140000,7%,8,Advanced,Asia,E-commerce,"[{""q1_2023"":28},{""q2_2023"":34},{""q3_2023"":42},{""q4_2023"":50},{""q1_2024"":58}]",2024-06-01
+S029,React Native,Mobile Development,Cross Platform,High,25%,$130000,6%,15,Intermediate,Global,Technology,"[{""q1_2023"":25},{""q2_2023"":30},{""q3_2023"":38},{""q4_2023"":45},{""q1_2024"":52}]",2024-06-01
+S030,Flutter,Mobile Development,Cross Platform,High,28%,$125000,7%,18,Intermediate,Global,Technology,"[{""q1_2023"":20},{""q2_2023"":26},{""q3_2023"":34},{""q4_2023"":42},{""q1_2024"":50}]",2024-06-01 

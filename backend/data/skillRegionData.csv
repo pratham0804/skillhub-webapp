@@ -1,0 +1,43 @@
+region,skillName,demandScore,growthRate,averageSalary,jobCount,dateUpdated
+North America,Machine Learning,85,32%,$155000,12500,2024-06-01
+North America,React.js,90,30%,$140000,18000,2024-06-01
+North America,Python,88,18%,$135000,22000,2024-06-01
+North America,Cloud Architecture,80,22%,$150000,15000,2024-06-01
+North America,Data Engineering,78,26%,$145000,14000,2024-06-01
+North America,DevOps,82,20%,$140000,16000,2024-06-01
+North America,Cybersecurity,88,28%,$150000,17000,2024-06-01
+Europe,Machine Learning,75,30%,$130000,9500,2024-06-01
+Europe,React.js,82,25%,$120000,15000,2024-06-01
+Europe,Python,85,15%,$115000,18000,2024-06-01
+Europe,Cloud Architecture,78,18%,$135000,12000,2024-06-01
+Europe,Data Engineering,72,22%,$125000,11000,2024-06-01
+Europe,DevOps,80,16%,$130000,13000,2024-06-01
+Europe,Cybersecurity,82,24%,$140000,14000,2024-06-01
+Asia,Machine Learning,80,38%,$140000,15000,2024-06-01
+Asia,React.js,85,32%,$125000,20000,2024-06-01
+Asia,Python,82,20%,$120000,25000,2024-06-01
+Asia,Cloud Architecture,75,23%,$135000,13000,2024-06-01
+Asia,Data Engineering,70,28%,$130000,12000,2024-06-01
+Asia,DevOps,78,20%,$125000,14000,2024-06-01
+Asia,Cybersecurity,75,26%,$135000,13000,2024-06-01
+South America,Machine Learning,70,35%,$120000,6000,2024-06-01
+South America,React.js,75,28%,$110000,9000,2024-06-01
+South America,Python,78,18%,$105000,12000,2024-06-01
+South America,Cloud Architecture,65,20%,$125000,5000,2024-06-01
+South America,Data Engineering,60,24%,$115000,4500,2024-06-01
+South America,DevOps,68,17%,$110000,6500,2024-06-01
+South America,Cybersecurity,70,22%,$120000,7000,2024-06-01
+Australia,Machine Learning,78,28%,$135000,3500,2024-06-01
+Australia,React.js,80,24%,$130000,5000,2024-06-01
+Australia,Python,82,14%,$125000,6000,2024-06-01
+Australia,Cloud Architecture,75,19%,$140000,4000,2024-06-01
+Australia,Data Engineering,70,22%,$130000,3800,2024-06-01
+Australia,DevOps,76,15%,$135000,4500,2024-06-01
+Australia,Cybersecurity,79,23%,$145000,4200,2024-06-01
+Africa,Machine Learning,65,40%,$100000,2000,2024-06-01
+Africa,React.js,70,35%,$95000,3500,2024-06-01
+Africa,Python,75,25%,$90000,4500,2024-06-01
+Africa,Cloud Architecture,60,25%,$110000,1800,2024-06-01
+Africa,Data Engineering,55,30%,$105000,1500,2024-06-01
+Africa,DevOps,65,22%,$100000,2200,2024-06-01
+Africa,Cybersecurity,68,28%,$115000,2500,2024-06-01 

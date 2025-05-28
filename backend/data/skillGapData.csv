@@ -1,0 +1,25 @@
+roleId,roleName,skillId,skillName,requiredProficiency,averageUserProficiency,gapScore,impactOnSalary,demandTrend,region,industryVertical
+R001,Data Scientist,S001,Machine Learning,9,6,3,High,Growing,Global,Technology
+R001,Data Scientist,S003,Python,8,7,1,Medium,Stable,Global,Technology
+R001,Data Scientist,S005,Data Engineering,7,5,2,Medium,Growing,Global,Technology
+R001,Data Scientist,S010,Natural Language Processing,8,4,4,High,Growing,Global,Technology
+R001,Data Scientist,S014,TensorFlow,7,4,3,Medium,Growing,Global,Technology
+R001,Data Scientist,S015,SQL,6,6,0,Low,Stable,Global,Technology
+R002,Front-end Developer,S002,React.js,9,7,2,High,Growing,Global,Technology
+R002,Front-end Developer,S007,TypeScript,8,6,2,Medium,Growing,Global,Technology
+R002,Front-end Developer,S013,GraphQL,7,4,3,Medium,Growing,Global,Technology
+R002,Front-end Developer,S016,UI/UX Design,6,5,1,Low,Stable,Global,Technology
+R002,Front-end Developer,S019,Vue.js,5,3,2,Low,Growing,Global,Technology
+R003,DevOps Engineer,S004,Cloud Architecture,8,5,3,High,Growing,Global,Technology
+R003,DevOps Engineer,S006,DevOps,9,6,3,High,Growing,Global,Technology
+R003,DevOps Engineer,S008,Kubernetes,8,5,3,High,Growing,Global,Technology
+R003,DevOps Engineer,S011,AWS,7,6,1,Medium,Stable,Global,Technology
+R003,DevOps Engineer,S012,Docker,7,6,1,Medium,Stable,Global,Technology
+R004,Cybersecurity Analyst,S020,Cybersecurity,9,6,3,High,Growing,Global,Technology
+R004,Cybersecurity Analyst,S003,Python,7,5,2,Medium,Stable,Global,Technology
+R004,Cybersecurity Analyst,S006,DevOps,6,4,2,Medium,Growing,Global,Technology
+R004,Cybersecurity Analyst,S011,AWS,7,5,2,Medium,Stable,Global,Technology
+R005,Mobile Developer,S029,React Native,8,6,2,Medium,Growing,Global,Technology
+R005,Mobile Developer,S030,Flutter,8,5,3,Medium,Growing,Global,Technology
+R005,Mobile Developer,S007,TypeScript,7,6,1,Low,Growing,Global,Technology
+R005,Mobile Developer,S002,React.js,6,5,1,Low,Growing,Global,Technology 

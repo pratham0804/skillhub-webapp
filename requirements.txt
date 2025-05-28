@@ -1,0 +1,142 @@
+# SkillHub - AI-Powered Skill Enhancement Companion
+# Project Requirements and Dependencies
+
+# ============================================
+# SYSTEM REQUIREMENTS
+# ============================================
+# Node.js: v16.0.0 or higher
+# MongoDB: v4.4 or higher  
+# npm: v7.0.0 or higher
+# Git: Latest version
+
+# ============================================
+# FRONTEND DEPENDENCIES (React)
+# ============================================
+# Core React packages
+react: ^18.2.0
+react-dom: ^18.2.0
+react-router-dom: ^6.16.0
+react-scripts: ^5.0.1
+
+# HTTP & API
+axios: ^1.5.1
+
+# UI & Visualization
+chart.js: ^4.4.9
+react-chartjs-2: ^5.3.0
+recharts: ^2.15.3
+
+# Icons & Styling
+@fortawesome/fontawesome-svg-core: ^6.7.2
+@fortawesome/free-solid-svg-icons: ^6.7.2
+@fortawesome/react-fontawesome: ^0.2.2
+
+# Authentication & Firebase
+firebase: ^8.10.1
+
+# Testing
+@testing-library/jest-dom: ^5.17.0
+@testing-library/react: ^13.4.0
+@testing-library/user-event: ^13.5.0
+
+# ============================================
+# BACKEND DEPENDENCIES (Node.js/Express)
+# ============================================
+# Core Server
+express: ^4.18.2
+nodemon: ^3.0.1 (dev dependency)
+
+# Database
+mongoose: ^7.5.3
+
+# Authentication & Security
+jsonwebtoken: ^9.0.2
+cors: ^2.8.5
+
+# Environment & Configuration
+dotenv: ^16.5.0
+
+# HTTP Client
+axios: ^1.8.4
+
+# File Processing
+multer: ^1.4.5-lts.1
+pdf-parse: ^1.1.1
+csv-parser: ^3.2.0
+
+# Google Services & AI
+@google/generative-ai: ^0.1.3
+googleapis: ^126.0.1
+google-spreadsheet: ^3.3.0
+
+# Firebase
+firebase: ^8.10.1
+
+# Email & Communication
+nodemailer: ^6.9.7
+
+# Utilities
+uuid: ^11.1.0
+node-cache: ^5.1.2
+
+# ============================================
+# DATABASE REQUIREMENTS
+# ============================================
+# MongoDB Community Server: v4.4 or higher
+# MongoDB Atlas: Cloud option available
+# Default connection: mongodb://localhost:27017/skillhub
+
+# ============================================
+# EXTERNAL SERVICES & APIs
+# ============================================
+# Google Cloud Platform (for Gemini AI)
+# Firebase (for authentication & hosting)
+# Google Sheets API (for data integration)
+# Google OAuth2 (for sign-in)
+# YouTube API (for learning resources)
+
+# ============================================
+# DEVELOPMENT TOOLS
+# ============================================
+# Code Editor: VS Code (recommended)
+# Browser: Chrome/Firefox/Safari
+# API Testing: Postman/Thunder Client
+# Database GUI: MongoDB Compass
+
+# ============================================
+# INSTALLATION COMMAND SUMMARY
+# ============================================
+# Backend Setup:
+# cd backend && npm install
+
+# Frontend Setup:  
+# cd frontend && npm install
+
+# ============================================
+# ENVIRONMENT CONFIGURATION
+# ============================================
+# Backend: Copy backend/env.example to backend/.env
+# Frontend: Copy frontend/env.example to frontend/.env
+# Configure all required API keys and secrets
+
+# ============================================
+# PORT CONFIGURATION
+# ============================================
+# Backend Server: http://localhost:5000
+# Frontend Server: http://localhost:3000
+# MongoDB: mongodb://localhost:27017
+
+# ============================================
+# BUILD & DEPLOYMENT
+# ============================================
+# Frontend Build: npm run build (in frontend directory)
+# Backend Start: npm start (in backend directory)
+# Development: npm run dev (backend) & npm start (frontend)
+
+# ============================================
+# MINIMUM SYSTEM SPECIFICATIONS
+# ============================================
+# RAM: 4GB minimum, 8GB recommended
+# Storage: 2GB free space
+# OS: Windows 10, macOS 10.14, Ubuntu 18.04 or higher
+# Internet: Required for API services and package installation 
