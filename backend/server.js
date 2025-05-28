@@ -40,6 +40,8 @@ const corsOptions = {
       'http://localhost:3002',
       'http://localhost:5001',
       'http://localhost:5001/', // Add trailing slash version
+      'https://skillhub-webapp.vercel.app', // Production Vercel frontend
+      'https://skillhub-webapp.vercel.app/', // With trailing slash
       undefined // Allow requests with no origin (like mobile apps, curl, postman)
     ];
     
