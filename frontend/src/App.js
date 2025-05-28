@@ -508,7 +508,7 @@ function AppContent() {
   useEffect(() => {
     const checkBackend = async () => {
       try {
-        const response = await fetch('/api/health');
+        const response = await fetch('https://skillhub-backend-97uq.onrender.com/api/health');
         const data = await response.json();
         if (data.status === 'OK') {
           setBackendStatus('Connected');
