@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Configure axios for API requests
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: process.env.REACT_APP_API_URL || '/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
