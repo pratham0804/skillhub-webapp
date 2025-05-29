@@ -1,5 +1,7 @@
 .contribution-page {
   padding: var(--spacing-xl) 0;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .container {
@@ -65,6 +67,9 @@
   box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
+  animation: slideInUp 0.6s ease-out;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .tab-content::before {
@@ -79,12 +84,20 @@
 
 .skill-contribution-form,
 .tool-contribution-form {
-  animation: fadeIn 0.5s ease;
+  animation: scaleIn 0.5s ease-out;
 }
 
 .form-group {
   margin-bottom: var(--spacing-lg);
+  animation: fadeIn 0.4s ease-out;
+  animation-fill-mode: both;
 }
+
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+.form-group:nth-child(3) { animation-delay: 0.3s; }
+.form-group:nth-child(4) { animation-delay: 0.4s; }
+.form-group:nth-child(5) { animation-delay: 0.5s; }
 
 .form-row {
   display: grid;
@@ -106,6 +119,29 @@
   margin-right: 0.5rem;
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.skill-tag::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.5s;
+}
+
+.skill-tag:hover::before {
+  left: 100%;
+}
+
+.skill-tag:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
 }
 
 .skill-tag button {
@@ -148,11 +184,32 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+  animation: bounceInLeft 0.8s ease-out;
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.submit-btn:hover::before {
+  width: 300px;
+  height: 300px;
 }
 
 .submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(79, 70, 229, 0.4);
 }
 
 .submit-btn:disabled {
@@ -166,6 +223,25 @@
   border-radius: var(--radius-md);
   margin-bottom: var(--spacing-lg);
   font-weight: 500;
+  animation: bounceInRight 0.6s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.alert::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmerAlert 2s infinite;
+}
+
+@keyframes shimmerAlert {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
 .alert.success {
@@ -181,6 +257,250 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-100px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(10px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes bounceInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(100px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-10px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes colorShift {
+  0%, 100% { filter: hue-rotate(0deg); }
+  25% { filter: hue-rotate(90deg); }
+  50% { filter: hue-rotate(180deg); }
+  75% { filter: hue-rotate(270deg); }
+}
+
+@keyframes textGlow {
+  0%, 100% { 
+    text-shadow: 0 0 5px rgba(79, 70, 229, 0.3),
+                 0 0 10px rgba(79, 70, 229, 0.2),
+                 0 0 15px rgba(79, 70, 229, 0.1);
+  }
+  50% { 
+    text-shadow: 0 0 10px rgba(79, 70, 229, 0.6),
+                 0 0 20px rgba(79, 70, 229, 0.4),
+                 0 0 30px rgba(79, 70, 229, 0.2);
+  }
+}
+
+@keyframes particleFloat {
+  0%, 100% { 
+    transform: translate(0, 0) scale(1);
+    opacity: 0.7;
+  }
+  25% { 
+    transform: translate(10px, -10px) scale(1.1);
+    opacity: 1;
+  }
+  50% { 
+    transform: translate(-5px, -20px) scale(0.9);
+    opacity: 0.8;
+  }
+  75% { 
+    transform: translate(-10px, -10px) scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header h1 {
+    font-size: 2rem;
+    animation: textGlow 3s ease-in-out infinite;
+  }
+  
+  .tabs {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .tab-btn {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tab-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tab-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.tab-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #4f46e5, #10b981);
+  border-radius: 4px;
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #3730a3, #059669);
+}
+
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.tab-btn:focus,
+.submit-btn:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Background Removal Techniques for Images */
+.image-background-removal {
+  /* Method 1: Blend modes to remove white backgrounds */
+  mix-blend-mode: multiply;
+  background: transparent;
+}
+
+.image-background-removal.white-bg-remove {
+  /* Remove white/light backgrounds */
+  filter: contrast(1.2) brightness(0.9);
+  mix-blend-mode: darken;
+}
+
+.image-background-removal.transparent-bg {
+  /* Make background areas transparent */
+  background: transparent;
+  backdrop-filter: blur(0px);
+}
+
+/* Alternative background removal using CSS masking */
+.image-no-background {
+  /* Create a mask to hide background areas */
+  -webkit-mask: radial-gradient(circle, black 70%, transparent 90%);
+  mask: radial-gradient(circle, black 70%, transparent 90%);
+  background: transparent;
+}
+
+/* Advanced background removal for illustrations */
+.illustration-clean {
+  /* Enhance contrast to separate foreground from background */
+  filter: contrast(1.3) saturate(1.1) brightness(0.95);
+  mix-blend-mode: multiply;
+  background: transparent;
+  
+  /* Remove light backgrounds */
+  -webkit-mask: 
+    linear-gradient(45deg, transparent 5%, black 15%, black 85%, transparent 95%),
+    radial-gradient(circle, black 60%, transparent 80%);
+  mask: 
+    linear-gradient(45deg, transparent 5%, black 15%, black 85%, transparent 95%),
+    radial-gradient(circle, black 60%, transparent 80%);
+  -webkit-mask-composite: intersect;
+  mask-composite: intersect;
+}
+
+/* Specific styling for community collaboration images */
+.community-image-clean {
+  /* Optimize for illustration-style images */
+  filter: contrast(1.2) saturate(1.05) brightness(0.92);
+  mix-blend-mode: darken;
+  background: transparent;
+  
+  /* Transition effects */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.community-image-clean:hover {
+  /* Restore normal blend mode on hover for full visibility */
+  mix-blend-mode: normal;
+  filter: contrast(1.1) saturate(1.1) brightness(1.05);
+  transform: scale(1.05) translateY(-10px);
+}
+
+/* PNG-like transparency effect */
+.png-transparency-effect {
+  /* Create PNG-like transparency for JPG images */
+  background: transparent;
+  filter: contrast(1.25) brightness(0.9);
+  
+  /* Use multiple backgrounds to create transparency illusion */
+  background-image: 
+    radial-gradient(circle at 30% 30%, transparent 40%, rgba(255,255,255,0.1) 60%),
+    radial-gradient(circle at 70% 70%, transparent 40%, rgba(255,255,255,0.1) 60%);
+  background-blend-mode: multiply, screen;
 } 
