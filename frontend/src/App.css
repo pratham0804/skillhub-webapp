@@ -3502,15 +3502,21 @@
 }
 
 .mobile-menu-toggle.active .hamburger-line:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
+  transform: rotate(45deg) translate(6px, 6px);
+  background-color: #1f2937 !important;
+  opacity: 1 !important;
 }
 
 .mobile-menu-toggle.active .hamburger-line:nth-child(2) {
-  opacity: 0;
+  opacity: 0 !important;
+  transform: scaleX(0) !important; /* Also scale it to 0 width as backup */
+  visibility: hidden !important; /* Extra insurance it's hidden */
 }
 
 .mobile-menu-toggle.active .hamburger-line:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -6px);
+  transform: rotate(-45deg) translate(6px, -6px);
+  background-color: #1f2937 !important;
+  opacity: 1 !important;
 }
 
 /* Mobile Navigation Overlay */
