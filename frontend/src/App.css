@@ -3467,20 +3467,28 @@
   align-items: center;
   width: 40px;
   height: 40px;
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.1); /* Added subtle background */
+  border: 1px solid rgba(31, 41, 55, 0.1); /* Added subtle border */
+  border-radius: 8px; /* Added border radius */
   cursor: pointer;
   z-index: 1002; /* Higher than overlay */
   position: relative;
+  transition: all 0.2s ease; /* Added smooth transition */
+}
+
+.mobile-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.2); /* Hover effect */
+  border-color: rgba(31, 41, 55, 0.2);
 }
 
 .hamburger-line {
   width: 24px;
   height: 2px;
-  background: white;
+  background: #1f2937; /* Changed from white to dark color for visibility */
   margin: 3px 0;
   transition: all 0.3s ease;
   transform-origin: center;
+  border-radius: 1px; /* Added border radius for better appearance */
 }
 
 .mobile-menu-toggle.active .hamburger-line:nth-child(1) {
