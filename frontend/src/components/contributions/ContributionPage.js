@@ -233,12 +233,8 @@ const AnimatedTitle = styled(Typography)(({ theme }) => ({
   marginBottom: '24px',
   animation: `${slideInFromLeft} 1s ease-out`,
   position: 'relative',
-  // Updated to match home page "LEVEL UP" styling
-  background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #8b5cf6 100%)',
-  WebkitBackgroundClip: 'text',
-  backgroundClip: 'text',
-  color: 'transparent',
-  WebkitTextFillColor: 'transparent',
+  // Updated to match the exact blue color from "Level Up Your" 
+  color: '#3b82f6', // Same bright blue color as "Level Up Your"
   // Enhanced styling for better visibility
   textShadow: 'none',
   '&::after': {
@@ -252,6 +248,14 @@ const AnimatedTitle = styled(Typography)(({ theme }) => ({
     background: `linear-gradient(135deg, #4c1d95, #6d28d9)`,
     borderRadius: '2px',
     animation: `${slideInFromRight} 1s ease-out 0.5s both`,
+  },
+  // Gradient for the highlight span - exactly matching home page
+  '& .highlight-gradient': {
+    background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #8b5cf6 100%)',
+    WebkitBackgroundClip: 'text',
+    backgroundClip: 'text',
+    color: 'transparent',
+    WebkitTextFillColor: 'transparent',
   }
 }));
 
@@ -300,7 +304,7 @@ const ContributionPage = () => {
         ${theme.palette.primary.main}05 50%,
         ${theme.palette.secondary.main}05 100%)`,
       py: 6,
-      pt: 12
+      pt: 8
     }}>
       <Container maxWidth="xl">
         {/* Hero Section */}
@@ -317,7 +321,7 @@ const ContributionPage = () => {
                 {/* Left Content */}
                 <Box>
                   <AnimatedTitle variant={isMobile ? 'h3' : 'h2'}>
-                    Shape the Future of Tech Learning
+                    Shape the Future of <span className="highlight-gradient">Tech Learning</span>
                   </AnimatedTitle>
                   
                   <Typography 
@@ -332,36 +336,6 @@ const ContributionPage = () => {
                     Join our global community of developers and contribute your knowledge to help millions 
                     of learners discover new skills and tools. Every contribution matters! 🚀
                   </Typography>
-
-                  {/* Floating Action Icons */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    flexWrap: 'wrap', 
-                    gap: 1, 
-                    mb: 4,
-                    animation: `${slideInFromLeft} 1s ease-out 0.6s both`
-                  }}>
-                    <Tooltip title="Contribute Skills" arrow>
-                      <FloatingIcon delay={0}>
-                        <CodeIcon />
-                      </FloatingIcon>
-                    </Tooltip>
-                    <Tooltip title="Share Tools" arrow>
-                      <FloatingIcon delay={0.2}>
-                        <BuildIcon />
-                      </FloatingIcon>
-                    </Tooltip>
-                    <Tooltip title="Get Recognized" arrow>
-                      <FloatingIcon delay={0.4}>
-                        <StarIcon />
-                      </FloatingIcon>
-                    </Tooltip>
-                    <Tooltip title="Join Community" arrow>
-                      <FloatingIcon delay={0.6}>
-                        <PeopleIcon />
-                      </FloatingIcon>
-                    </Tooltip>
-                  </Box>
 
                   {/* Call to Action Chips */}
                   <Box sx={{ 

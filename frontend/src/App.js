@@ -20,7 +20,7 @@ import growthDecoration from './assets/images/image_3352.jpg';
 import skillDevelopmentIllustration from './assets/images/Multi-device targeting-amico.png';
 
 // NavLink component to handle active state
-const NavLink = ({ to, children }) => {
+const NavLink = ({ to, children, onClick }) => {
   const location = useLocation();
   const isActive = location.pathname === to;
   
@@ -28,6 +28,7 @@ const NavLink = ({ to, children }) => {
     <Link 
       to={to} 
       className={`nav-link ${isActive ? 'active' : ''}`}
+      onClick={onClick}
     >
       {children}
     </Link>
@@ -95,9 +96,31 @@ const Home = () => {
       });
     };
 
+    // Hero image scroll animation for mobile
+    const animateHeroImage = () => {
+      const imageContainer = document.querySelector('.hero-image .image-container');
+      if (imageContainer) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              // Add animation class when image comes into view
+              entry.target.classList.add('animate-in');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.3, // Trigger when 30% of image is visible
+          rootMargin: '0px 0px -20px 0px'
+        });
+        
+        observer.observe(imageContainer);
+      }
+    };
+
     // Initialize animations
     animateCounters();
     animateOnScroll();
+    animateHeroImage();
 
     // Cleanup
     return () => {
@@ -173,9 +196,6 @@ const Home = () => {
           </div>
           <h3>AI-Powered Skill Analysis</h3>
           <p>Get personalized insights into your skillset with our advanced AI that identifies gaps and suggests learning paths.</p>
-          <div className="feature-link">
-            <Link to="/skill-gap-analysis">Try Analysis →</Link>
-          </div>
         </div>
         
         <div className="feature-card animate-slide-up delay-200">
@@ -184,9 +204,6 @@ const Home = () => {
           </div>
           <h3>Real-Time Market Trends</h3>
           <p>Stay ahead with live data on the most in-demand skills, salary ranges, and emerging technologies in your field.</p>
-          <div className="feature-link">
-            <Link to="/data-dashboard">View Trends →</Link>
-          </div>
         </div>
         
         <div className="feature-card animate-slide-up delay-300">
@@ -195,9 +212,6 @@ const Home = () => {
           </div>
           <h3>Community-Driven Insights</h3>
           <p>Contribute to and benefit from our growing database of skills and experiences shared by professionals like you.</p>
-          <div className="feature-link">
-            <Link to="/contribute">Contribute →</Link>
-          </div>
         </div>
         
         <div className="feature-card animate-slide-up delay-400">
@@ -206,9 +220,6 @@ const Home = () => {
           </div>
           <h3>Career Path Planning</h3>
           <p>Set goals, track progress, and get personalized recommendations to reach your dream tech career faster.</p>
-          <div className="feature-link">
-            <Link to="/dashboard">Get Started →</Link>
-          </div>
         </div>
         
         <div className="feature-card animate-slide-up delay-500">
@@ -217,9 +228,6 @@ const Home = () => {
           </div>
           <h3>Resume Optimization</h3>
           <p>Upload your resume and get AI-powered feedback on how to highlight your skills for maximum impact.</p>
-          <div className="feature-link">
-            <Link to="/resume">Optimize Resume →</Link>
-          </div>
         </div>
         
         <div className="feature-card animate-slide-up delay-600">
@@ -228,9 +236,6 @@ const Home = () => {
           </div>
           <h3>Skill Certification</h3>
           <p>Validate your expertise with our skill assessments and earn certificates recognized by top employers.</p>
-          <div className="feature-link">
-            <span>Coming Soon →</span>
-          </div>
         </div>
       </div>
     </div>
@@ -431,6 +436,7 @@ const Header = () => {
   const { currentUser, logout } = useContext(AuthContext);
   const scrollDirection = useScrollDirection();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -440,26 +446,68 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isMobileMenuOpen && !event.target.closest('.mobile-nav') && !event.target.closest('.mobile-menu-toggle')) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isMobileMenuOpen]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
   
   const handleLogout = async () => {
     try {
       await logout();
+      setIsMobileMenuOpen(false);
     } catch (error) {
       console.error('Logout error:', error);
     }
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
   };
   
   return (
     <header className={`main-header ${scrollDirection === 'down' && isScrolled ? 'nav-hidden' : ''} ${isScrolled ? 'scrolled' : ''}`}>
       <div className="header-container">
         <div className="logo">
-          <Link to="/">
+          <Link to="/" onClick={closeMobileMenu}>
             <span className="logo-text">SkillHub</span>
             <span className="logo-dot">.</span>
           </Link>
         </div>
         
-        <nav className="main-nav">
+        {/* Mobile Hamburger Menu Button */}
+        <button 
+          className={`mobile-menu-toggle ${isMobileMenuOpen ? 'active' : ''}`}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle mobile menu"
+        >
+          <span className="hamburger-line"></span>
+          <span className="hamburger-line"></span>
+          <span className="hamburger-line"></span>
+        </button>
+        
+        {/* Desktop Navigation */}
+        <nav className="main-nav desktop-nav">
           <ul className="nav-links">
             <li><NavLink to="/">Home</NavLink></li>
             <li><NavLink to="/about">About</NavLink></li>
@@ -477,7 +525,8 @@ const Header = () => {
           </ul>
         </nav>
         
-        <div className="auth-actions">
+        {/* Desktop Auth Actions */}
+        <div className="auth-actions desktop-auth">
           {currentUser ? (
             <div className="user-menu">
               <span className="user-greeting">Hey, {currentUser.username || 'User'}</span>
@@ -494,6 +543,62 @@ const Header = () => {
               <Link to="/register" className="register-btn">Sign Up</Link>
             </div>
           )}
+        </div>
+
+        {/* Mobile Navigation Overlay */}
+        <div 
+          className={`mobile-nav-overlay ${isMobileMenuOpen ? 'active' : ''}`}
+          onClick={(e) => {
+            // Close menu if clicking on overlay background (not on nav content)
+            if (e.target.classList.contains('mobile-nav-overlay')) {
+              setIsMobileMenuOpen(false);
+            }
+          }}
+        >
+          <nav className="mobile-nav">
+            <ul className="mobile-nav-links">
+              <li><NavLink to="/" onClick={closeMobileMenu}>🏠 Home</NavLink></li>
+              <li><NavLink to="/about" onClick={closeMobileMenu}>ℹ️ About</NavLink></li>
+              {currentUser ? (
+                <>
+                  <li><NavLink to="/profile" onClick={closeMobileMenu}>👤 Profile</NavLink></li>
+                  <li><NavLink to="/skill-gap-analysis" onClick={closeMobileMenu}>📊 Skills Analysis</NavLink></li>
+                  <li><NavLink to="/resume-builder" onClick={closeMobileMenu}>📄 Resume Builder</NavLink></li>
+                  <li><NavLink to="/data-dashboard" onClick={closeMobileMenu}>📈 Market Trends</NavLink></li>
+                  <li><NavLink to="/contribute" onClick={closeMobileMenu}>🤝 Contribute</NavLink></li>
+                  {currentUser.email && currentUser.email.includes('admin') && (
+                    <li><Link to="/admin/contributions" onClick={closeMobileMenu} className="admin-mobile-link">⚙️ Admin Panel</Link></li>
+                  )}
+                </>
+              ) : (
+                <li><NavLink to="/contribute" onClick={closeMobileMenu}>🤝 Contribute</NavLink></li>
+              )}
+            </ul>
+            
+            {/* Mobile Auth Section */}
+            <div className="mobile-auth-section">
+              {currentUser ? (
+                <div className="mobile-user-info">
+                  <div className="mobile-user-greeting">
+                    <span className="user-avatar">👤</span>
+                    <span>Hey, {currentUser.username || 'User'}!</span>
+                  </div>
+                  <button className="mobile-logout-btn" onClick={handleLogout}>
+                    🚪 Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="mobile-auth-buttons">
+                  <Link to="/login" className="mobile-login-btn" onClick={closeMobileMenu}>
+                    🔑 Log In
+                  </Link>
+                  <Link to="/register" className="mobile-register-btn" onClick={closeMobileMenu}>
+                    ✨ Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
+          </nav>
         </div>
       </div>
     </header>
