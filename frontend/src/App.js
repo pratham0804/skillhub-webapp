@@ -9,6 +9,7 @@ import SkillGapAnalysis from './components/skills/SkillGapAnalysis';
 import DataDashboard from './components/data/DataDashboard';
 import ContributionPage from './components/contributions/ContributionPage';
 import AdminDashboard from './components/admin/AdminDashboard';
+import { initGA, trackPageView } from './utils/analytics';
 import './App.css';
 
 // Import Freepik images
@@ -18,6 +19,18 @@ import growthDecoration from './assets/images/image_3352.jpg';
 
 // Import the new PNG illustration (replace the SVG)
 import skillDevelopmentIllustration from './assets/images/Multi-device targeting-amico.png';
+
+// Page tracker component for route changes
+const PageTracker = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Track page view on route change
+    trackPageView(location.pathname + location.search, document.title);
+  }, [location]);
+
+  return null; // This component doesn't render anything
+};
 
 // NavLink component to handle active state
 const NavLink = ({ to, children, onClick }) => {
@@ -634,6 +647,15 @@ function AppContent() {
     return () => clearInterval(interval);
   }, []);
 
+  // Initialize Google Analytics
+  useEffect(() => {
+    // Initialize Google Analytics
+    initGA();
+    
+    // Track initial page view
+    trackPageView(window.location.pathname + window.location.search, document.title);
+  }, []);
+
   const getStatusClass = () => {
     if (backendStatus === 'Connected') return 'connected';
     if (backendStatus === 'Error') return 'error';
@@ -642,6 +664,7 @@ function AppContent() {
 
   return (
     <Router>
+      <PageTracker />
       <Header />
       <main className="app-main">
         <div className="container">
