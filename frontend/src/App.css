@@ -3502,7 +3502,7 @@
 }
 
 .mobile-menu-toggle.active .hamburger-line:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
+  transform: rotate(45deg) translate(5px, 5px);
   background-color: #1f2937 !important;
   opacity: 1 !important;
 }
@@ -3514,7 +3514,7 @@
 }
 
 .mobile-menu-toggle.active .hamburger-line:nth-child(3) {
-  transform: rotate(-45deg) translate(6px, -6px);
+  transform: rotate(-45deg) translate(5px, -5px);
   background-color: #1f2937 !important;
   opacity: 1 !important;
 }
