@@ -3465,34 +3465,40 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 44px; /* Increased size for better touch target */
+  width: 44px;
   height: 44px;
-  background: rgba(255, 255, 255, 0.9); /* More opaque background */
-  border: 2px solid rgba(31, 41, 55, 0.3); /* More visible border */
+  background: #ffffff !important; /* Solid white background for maximum contrast */
+  border: 2px solid #1f2937 !important; /* Dark border for definition */
   border-radius: 8px;
   cursor: pointer;
   z-index: 1002;
   position: relative;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Stronger shadow for better visibility */
 }
 
 .mobile-menu-toggle:hover {
-  background: rgba(255, 255, 255, 1); /* Full opacity on hover */
-  border-color: rgba(31, 41, 55, 0.5);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background: #f8f9fa !important; /* Slightly off-white on hover */
+  border-color: #374151;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .hamburger-line {
   width: 24px;
-  height: 3px; /* Increased from 2px for better visibility */
-  background: #1f2937; /* Dark color for visibility */
-  margin: 2px 0; /* Reduced margin for better spacing */
+  height: 3px;
+  background-color: #1f2937 !important;
+  border: 1px solid #1f2937 !important; /* Add border as fallback for Android */
+  margin: 2px 0;
   transition: all 0.3s ease;
   transform-origin: center;
-  border-radius: 2px; /* Slightly more rounded */
-  display: block; /* Ensure block display for spans */
-  opacity: 1; /* Ensure full opacity */
+  border-radius: 2px;
+  display: block !important;
+  opacity: 1 !important;
+  position: relative;
+  flex-shrink: 0;
+  /* Force content existence for Android browsers */
+  min-height: 3px;
+  box-sizing: border-box;
 }
 
 .mobile-menu-toggle.active .hamburger-line:nth-child(1) {
