@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
   // Set up API client - use useMemo to prevent recreation on every render
   const api = useMemo(() => {
     const client = axios.create({
-      baseURL: 'https://skillhub-backend-97uq.onrender.com/api',
+      baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
       headers: {
         'Content-Type': 'application/json'
       },

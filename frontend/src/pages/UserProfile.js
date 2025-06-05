@@ -496,7 +496,7 @@ const UserProfile = () => {
           return;
         }
 
-        const response = await axios.get('https://skillhub-backend-97uq.onrender.com/api/users/profile', {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -658,7 +658,7 @@ const UserProfile = () => {
       
       console.log('Sending data to backend:', JSON.stringify(dataToSend, null, 2));
       
-      const response = await axios.put('https://skillhub-backend-97uq.onrender.com/api/users/profile', dataToSend, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/profile`, dataToSend, {
           headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -802,7 +802,7 @@ const UserProfile = () => {
 
       const token = localStorage.getItem('token');
       // Use existing resume upload endpoint
-      const response = await axios.post('https://skillhub-backend-97uq.onrender.com/api/resume/upload', formDataUpload, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/resume/upload`, formDataUpload, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
