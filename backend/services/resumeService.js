@@ -11,7 +11,7 @@ let model;
 try {
   if (process.env.GEMINI_API_KEY) {
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     console.log('Gemini API initialized successfully for resume service');
   } else {
     console.warn('GEMINI_API_KEY not set for resume service. Using mock model.');

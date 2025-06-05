@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminContributions.css';
 
-const API_URL = 'https://skillhub-backend-97uq.onrender.com/api';
+const API_URL = 'http://localhost:5000/api';
 
 // Add a local storage utility for contributions
 const localContributionStorage = {
@@ -570,25 +570,30 @@ const AdminContributions = () => {
           
           // Add details about where data was saved
           if (response.data.data) {
-            const { jsonSaved, csvSaved, localSaved, filePath } = response.data.data;
+            const { googleSheetsSuccess, localSaved, filePath, sheetInfo } = response.data.data;
             
             const savedLocations = [];
-            if (jsonSaved) savedLocations.push('JSON file');
-            if (csvSaved) savedLocations.push('CSV file');
+            if (googleSheetsSuccess) savedLocations.push('Google Sheets');
             if (localSaved) savedLocations.push('local storage');
             
             if (savedLocations.length > 0) {
               message += ` Data was saved to: ${savedLocations.join(', ')}.`;
             }
             
+            // Show Google Sheets specific info
+            if (sheetInfo) {
+              message += ` Added to sheet: ${sheetInfo.sheetTitle}`;
+            }
+            
             // Show file path if available
             if (filePath) {
-              message += ` File location: ${filePath}`;
-                }
+              message += ` Local file: ${filePath}`;
+            }
             
             // Show any warnings
             if (response.data.data.warning) {
               console.warn('Warning from server:', response.data.data.warning);
+              message += ` (Warning: ${response.data.data.warning})`;
             }
           }
           

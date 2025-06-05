@@ -1,0 +1,14 @@
+{
+  "id": "SKILL_1749151095212_398",
+  "type": "skill",
+  "createdAt": "2025-06-05T19:18:15.213Z",
+  "skillName": "mongo",
+  "category": "Databases",
+  "demandLevel": "Medium",
+  "growthRate": "Steady",
+  "averageSalary": "10000",
+  "requiredExperience": "1",
+  "relatedSkills": [],
+  "learningResources": "**MongoDB:** Proficient in MongoDB, a leading NoSQL database designed for managing unstructured and semi-structured data. Expertise in its flexible schema allows for rapid application development and scalability, making it ideal for handling diverse and evolving data requirements in modern, data-intensive applications.\n",
+  "contributorEmail": "namandhoot@gmail.com"
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "SKILL_1749149623641_510",
+    "type": "skill",
+    "createdAt": "2025-06-05T18:53:43.641Z",
+    "skillName": "React",
+    "category": "Programming Languages",
+    "demandLevel": "Medium",
+    "growthRate": "Steady",
+    "averageSalary": "80000",
+    "requiredExperience": "1",
+    "relatedSkills": [
+      "javascript",
+      "node js"
+    ],
+    "learningResources": "**React:** A popular JavaScript library for building user interfaces, primarily focused on the frontend. Proficiency in React enables developers to create dynamic and interactive web applications, leveraging components and techniques for better state management to ensure predictable and efficient data handling, leading to improved application performance and maintainability.\n",
+    "contributorEmail": "dhootns@rknec.edu"
+  },
+  {
+    "id": "SKILL_1749151095212_398",
+    "type": "skill",
+    "createdAt": "2025-06-05T19:18:15.213Z",
+    "skillName": "mongo",
+    "category": "Databases",
+    "demandLevel": "Medium",
+    "growthRate": "Steady",
+    "averageSalary": "10000",
+    "requiredExperience": "1",
+    "relatedSkills": [],
+    "learningResources": "**MongoDB:** Proficient in MongoDB, a leading NoSQL database designed for managing unstructured and semi-structured data. Expertise in its flexible schema allows for rapid application development and scalability, making it ideal for handling diverse and evolving data requirements in modern, data-intensive applications.\n",
+    "contributorEmail": "namandhoot@gmail.com"
+  },
+  {
+    "id": "SKILL_1749152166074_837",
+    "type": "skill",
+    "createdAt": "2025-06-05T19:36:06.074Z",
+    "skillName": "Test Skill - Delete Me",
+    "category": "Testing",
+    "description": "This is a test skill that can be deleted",
+    "contributorEmail": "test@example.com"
+  },
+  {
+    "id": "SKILL_1749152228403_607",
+    "type": "skill",
+    "createdAt": "2025-06-05T19:37:08.403Z",
+    "skillName": "Test Skill - Delete Me",
+    "category": "Testing",
+    "description": "This is a test skill that can be deleted",
+    "contributorEmail": "test@example.com"
+  },
+  {
+    "id": "SKILL_1749152277418_206",
+    "type": "skill",
+    "createdAt": "2025-06-05T19:37:57.418Z",
+    "skillName": "Test Skill - Delete Me",
+    "category": "Testing",
+    "description": "This is a test skill that can be deleted",
+    "contributorEmail": "test@example.com"
+  },
+  {
+    "id": "SKILL_1749152417854_890",
+    "type": "skill",
+    "createdAt": "2025-06-05T19:40:17.855Z",
+    "skillName": "mongo",
+    "category": "Databases",
+    "demandLevel": "Medium",
+    "growthRate": "Steady",
+    "averageSalary": "10000",
+    "requiredExperience": "1",
+    "relatedSkills": [],
+    "learningResources": "**MongoDB:** Proficient in MongoDB, a leading NoSQL database designed for managing unstructured and semi-structured data. Expertise in its flexible schema allows for rapid application development and scalability, making it ideal for handling diverse and evolving data requirements in modern, data-intensive applications.\n",
+    "contributorEmail": "namandhoot@gmail.com"
+  }
+]

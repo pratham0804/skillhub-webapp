@@ -407,52 +407,7 @@ const ContributionPage = () => {
           </HeroContainer>
         </Fade>
 
-        {/* Stats Section */}
-        <Slide direction="up" in={isVisible} timeout={1500}>
-          <Box sx={{ mb: 6 }}>
-            <Typography 
-              variant="h4" 
-              sx={{ 
-                textAlign: 'center', 
-                mb: 4, 
-                fontWeight: 700,
-                color: 'text.primary'
-              }}
-            >
-              Community Impact 📊
-            </Typography>
-            
-            <Box sx={{ 
-              display: 'grid',
-              gridTemplateColumns: { 
-                xs: 'repeat(2, 1fr)', 
-                md: 'repeat(4, 1fr)' 
-              },
-              gap: 3
-            }}>
-              {stats.map((stat, index) => (
-                <StatsCard key={index} delay={index * 0.2}>
-                  <Avatar sx={{ 
-                    bgcolor: stat.color,
-                    width: 64,
-                    height: 64,
-                    mx: 'auto',
-                    mb: 2,
-                    boxShadow: `0 8px 25px ${stat.color}40`
-                  }}>
-                    {stat.icon}
-                  </Avatar>
-                  <Typography variant="h4" sx={{ fontWeight: 800, color: stat.color, mb: 1 }}>
-                    {stat.count}
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                    {stat.label}
-                  </Typography>
-                </StatsCard>
-              ))}
-            </Box>
-          </Box>
-        </Slide>
+
 
         {/* Tabs Section */}
         <Fade in={isVisible} timeout={2000}>

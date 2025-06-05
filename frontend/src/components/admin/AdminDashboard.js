@@ -187,9 +187,6 @@ const AdminDashboard = () => {
               Login
             </button>
           </form>
-          <p className="login-note">
-            Hint: Use admin@gmail.com with password 'thisisadmin'
-          </p>
         </div>
       </div>
     );

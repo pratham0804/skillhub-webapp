@@ -9,8 +9,8 @@ try {
   if (process.env.GEMINI_API_KEY) {
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     // Update the model name to one that's available in the current API version
-    model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    console.log('Gemini API initialized successfully with model: gemini-1.5-flash');
+    model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    console.log('Gemini API initialized successfully with model: gemini-2.0-flash');
   } else {
     console.warn('GEMINI_API_KEY not set. Using mock model.');
     // Create a mock model for development

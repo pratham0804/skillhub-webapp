@@ -1,0 +1,17 @@
+{
+  "id": "SKILL_1749149623641_510",
+  "type": "skill",
+  "createdAt": "2025-06-05T18:53:43.641Z",
+  "skillName": "React",
+  "category": "Programming Languages",
+  "demandLevel": "Medium",
+  "growthRate": "Steady",
+  "averageSalary": "80000",
+  "requiredExperience": "1",
+  "relatedSkills": [
+    "javascript",
+    "node js"
+  ],
+  "learningResources": "**React:** A popular JavaScript library for building user interfaces, primarily focused on the frontend. Proficiency in React enables developers to create dynamic and interactive web applications, leveraging components and techniques for better state management to ensure predictable and efficient data handling, leading to improved application performance and maintainability.\n",
+  "contributorEmail": "dhootns@rknec.edu"
+}

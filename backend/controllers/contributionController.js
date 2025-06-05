@@ -179,6 +179,9 @@ exports.reviewContribution = async (req, res) => {
     console.log(`Reviewing contribution ${contributionId} with status: ${status}`);
     console.log('Request body:', JSON.stringify(req.body));
     
+    // Declare contribution variable outside try-catch so it's accessible throughout the function
+    let contribution = null;
+    
     // Update database first - this is the most important part
     try {
     // Verify admin
@@ -196,7 +199,7 @@ exports.reviewContribution = async (req, res) => {
     }
     
       console.log('Admin verified, looking for contribution');
-    const contribution = await Contribution.findById(contributionId);
+    contribution = await Contribution.findById(contributionId);
     
     if (!contribution) {
         console.log(`Contribution not found: ${contributionId}`);
@@ -238,7 +241,7 @@ exports.reviewContribution = async (req, res) => {
       });
     }
     
-    // For approved contributions, try to save to file (but database update already succeeded)
+    // For approved contributions, try to save to Google Sheets and local storage
     let dataUpdateResult = null;
     let exportError = null;
     
@@ -253,27 +256,27 @@ exports.reviewContribution = async (req, res) => {
           contributorEmail: contribution.contributorEmail 
         };
         
-        // Try to save to local storage
+        // Try to save to Google Sheets and local storage
         try {
           if (contribution.type === 'Skill') {
-            console.log('Adding skill to local storage');
+            console.log('Adding skill to Google Sheets and local storage');
             dataUpdateResult = await sheetsUpdateService.addSkillToSheet(dataWithEmail);
             console.log('Skill save result:', dataUpdateResult);
           } else if (contribution.type === 'Tool') {
-            console.log('Adding tool to local storage');
+            console.log('Adding tool to Google Sheets and local storage');
             dataUpdateResult = await sheetsUpdateService.addToolToSheet(dataWithEmail);
             console.log('Tool save result:', dataUpdateResult);
           }
         } catch (saveError) {
-          console.error('Error saving to local storage:', saveError);
+          console.error('Error saving to Google Sheets and local storage:', saveError);
           exportError = saveError.message;
           
           // Don't fail the entire operation, the database was already updated
-            dataUpdateResult = {
-              success: true,
+          dataUpdateResult = {
+            success: true,
             error: saveError.message,
-            localSaved: false,
-            csvSaved: false
+            googleSheetsSuccess: false,
+            localSaved: false
           };
         }
       } catch (dataError) {
@@ -305,14 +308,23 @@ exports.reviewContribution = async (req, res) => {
     
     // Add data from the update result if available
     if (dataUpdateResult) {
-      responseData.data.jsonSaved = !!dataUpdateResult.jsonSaved;
-      responseData.data.csvSaved = !!dataUpdateResult.csvSaved;
+      responseData.data.googleSheetsSuccess = !!dataUpdateResult.googleSheetsSuccess;
       responseData.data.localSaved = !!dataUpdateResult.localSaved;
       responseData.data.filePath = dataUpdateResult.filePath;
+      responseData.data.sheetInfo = dataUpdateResult.sheetInfo;
+      
+      // Update the message to include where data was saved
+      if (dataUpdateResult.googleSheetsSuccess && dataUpdateResult.localSaved) {
+        responseData.message += ' and data was saved to Google Sheets and local storage';
+      } else if (dataUpdateResult.googleSheetsSuccess) {
+        responseData.message += ' and data was saved to Google Sheets';
+      } else if (dataUpdateResult.localSaved) {
+        responseData.message += ' and data was saved to local storage';
+      }
       
       // Add any warnings
-      if (dataUpdateResult.error || exportError) {
-        responseData.data.warning = dataUpdateResult.error || exportError;
+      if (dataUpdateResult.warning || dataUpdateResult.error || exportError) {
+        responseData.data.warning = dataUpdateResult.warning || dataUpdateResult.error || exportError;
       }
     }
     

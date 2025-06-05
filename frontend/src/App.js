@@ -620,33 +620,6 @@ const Header = () => {
 
 // Main App component
 function AppContent() {
-  const [backendStatus, setBackendStatus] = useState('Checking...');
-
-  // Test backend connection
-  useEffect(() => {
-    const checkBackend = async () => {
-      try {
-        const response = await fetch('https://skillhub-backend-97uq.onrender.com/api/health');
-        const data = await response.json();
-        if (data.status === 'OK') {
-          setBackendStatus('Connected');
-        } else {
-          setBackendStatus('Error');
-        }
-      } catch (error) {
-        setBackendStatus('Error');
-        console.error('Backend connection error:', error);
-      }
-    };
-
-    checkBackend();
-    
-    // Check connection periodically
-    const interval = setInterval(checkBackend, 30000); // Check every 30 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
-
   // Initialize Google Analytics
   useEffect(() => {
     // Initialize Google Analytics
@@ -655,12 +628,6 @@ function AppContent() {
     // Track initial page view
     trackPageView(window.location.pathname + window.location.search, document.title);
   }, []);
-
-  const getStatusClass = () => {
-    if (backendStatus === 'Connected') return 'connected';
-    if (backendStatus === 'Error') return 'error';
-    return 'checking';
-  };
 
   return (
     <Router>
@@ -767,12 +734,6 @@ function AppContent() {
           </div>
         </div>
       </footer>
-      
-      {/* Fixed position backend status indicator */}
-      <div className={`backend-status ${getStatusClass()}`}>
-        <div className="status-dot"></div>
-        Backend: {backendStatus}
-      </div>
     </Router>
   );
 }

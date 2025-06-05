@@ -1,0 +1,9 @@
+{
+  "id": "SKILL_1749152166074_837",
+  "type": "skill",
+  "createdAt": "2025-06-05T19:36:06.074Z",
+  "skillName": "Test Skill - Delete Me",
+  "category": "Testing",
+  "description": "This is a test skill that can be deleted",
+  "contributorEmail": "test@example.com"
+}

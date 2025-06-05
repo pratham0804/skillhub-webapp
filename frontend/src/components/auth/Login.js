@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
+import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -115,6 +116,16 @@ const Login = () => {
           disabled={isLoading}
         >
           Login with Google
+        </button>
+      </div>
+      
+      <div className="admin-login">
+        <button 
+          onClick={() => navigate('/admin')}
+          className="btn btn-admin"
+          type="button"
+        >
+          Login as Admin
         </button>
       </div>
       
