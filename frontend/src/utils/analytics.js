@@ -55,4 +55,24 @@ export const trackButtonClick = (buttonName, location) => {
 // Track feature usage
 export const trackFeatureUsage = (featureName, action) => {
   trackEvent('feature_usage', 'engagement', featureName, action);
+};
+
+// Track contribution form views
+export const trackContributionView = (formType) => {
+  trackEvent('contribution_view', 'contribution', formType);
+};
+
+// Track contribution form starts
+export const trackContributionStart = (formType) => {
+  trackEvent('contribution_start', 'contribution', formType);
+};
+
+// Track contribution submissions
+export const trackContributionSubmit = (formType, status) => {
+  trackEvent('contribution_submit', 'contribution', formType, status === 'success' ? 1 : 0);
+};
+
+// Track contribution form field interactions
+export const trackContributionField = (formType, fieldName) => {
+  trackEvent('contribution_field_interaction', 'contribution', `${formType}_${fieldName}`);
 }; 

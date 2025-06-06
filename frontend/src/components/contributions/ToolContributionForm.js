@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { trackContributionView, trackContributionStart, trackContributionSubmit, trackContributionField } from '../../utils/analytics';
 
 const ToolContributionForm = () => {
   const { api } = useAuth();
@@ -18,6 +19,11 @@ const ToolContributionForm = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [industry, setIndustry] = useState('');
+
+  // Track form view on mount
+  useEffect(() => {
+    trackContributionView('tool');
+  }, []);
 
   const categories = [
     'Development',
@@ -41,6 +47,8 @@ const ToolContributionForm = () => {
       ...formData,
       [name]: value
     });
+    // Track field interaction
+    trackContributionField('tool', name);
   };
 
   const handleAddIndustry = () => {
@@ -50,6 +58,8 @@ const ToolContributionForm = () => {
         relevantIndustries: [...formData.relevantIndustries, industry.trim()]
       });
       setIndustry('');
+      // Track industry addition
+      trackContributionField('tool', 'industry_add');
     }
   };
 
@@ -58,6 +68,8 @@ const ToolContributionForm = () => {
       ...formData,
       relevantIndustries: formData.relevantIndustries.filter(i => i !== industry)
     });
+    // Track industry removal
+    trackContributionField('tool', 'industry_remove');
   };
 
   const handleSubmit = async (e) => {
@@ -67,6 +79,9 @@ const ToolContributionForm = () => {
     setSuccess(false);
 
     try {
+      // Track form submission start
+      trackContributionStart('tool');
+
       // Validate email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
@@ -81,6 +96,9 @@ const ToolContributionForm = () => {
       });
 
       setSuccess(true);
+      // Track successful submission
+      trackContributionSubmit('tool', 'success');
+
       // Reset form
       setFormData({
         toolName: '',
@@ -94,6 +112,8 @@ const ToolContributionForm = () => {
       });
       setEmail('');
     } catch (error) {
+      // Track failed submission
+      trackContributionSubmit('tool', 'error');
       setError(error.response?.data?.message || error.message || 'Failed to submit contribution');
     } finally {
       setLoading(false);

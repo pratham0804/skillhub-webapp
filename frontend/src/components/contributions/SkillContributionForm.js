@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { trackContributionView, trackContributionStart, trackContributionSubmit, trackContributionField } from '../../utils/analytics';
 
 const SkillContributionForm = () => {
   const { api } = useAuth();
@@ -19,6 +20,11 @@ const SkillContributionForm = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [relatedSkill, setRelatedSkill] = useState('');
+
+  // Track form view on mount
+  useEffect(() => {
+    trackContributionView('skill');
+  }, []);
 
   const categories = [
     'Programming Languages',
@@ -42,6 +48,8 @@ const SkillContributionForm = () => {
       ...formData,
       [name]: value
     });
+    // Track field interaction
+    trackContributionField('skill', name);
   };
 
   const handleAddRelatedSkill = () => {
@@ -51,6 +59,8 @@ const SkillContributionForm = () => {
         relatedSkills: [...formData.relatedSkills, relatedSkill.trim()]
       });
       setRelatedSkill('');
+      // Track related skill addition
+      trackContributionField('skill', 'related_skill_add');
     }
   };
 
@@ -59,6 +69,8 @@ const SkillContributionForm = () => {
       ...formData,
       relatedSkills: formData.relatedSkills.filter(s => s !== skill)
     });
+    // Track related skill removal
+    trackContributionField('skill', 'related_skill_remove');
   };
 
   const handleSubmit = async (e) => {
@@ -68,6 +80,9 @@ const SkillContributionForm = () => {
     setSuccess(false);
 
     try {
+      // Track form submission start
+      trackContributionStart('skill');
+
       // Validate email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
@@ -82,6 +97,9 @@ const SkillContributionForm = () => {
       });
 
       setSuccess(true);
+      // Track successful submission
+      trackContributionSubmit('skill', 'success');
+
       // Reset form
       setFormData({
         skillName: '',
@@ -96,6 +114,8 @@ const SkillContributionForm = () => {
       });
       setEmail('');
     } catch (error) {
+      // Track failed submission
+      trackContributionSubmit('skill', 'error');
       setError(error.response?.data?.message || error.message || 'Failed to submit contribution');
     } finally {
       setLoading(false);
