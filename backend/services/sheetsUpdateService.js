@@ -490,5 +490,6 @@ const addToolToSheet = async (toolData) => {
 
 module.exports = {
   addSkillToSheet,
-  addToolToSheet
+  addToolToSheet,
+  getCredentials
 }; 
