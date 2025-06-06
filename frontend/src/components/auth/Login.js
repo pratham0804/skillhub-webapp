@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
+import axios from 'axios';
 import './Login.css';
 
 const Login = () => {
@@ -8,6 +9,11 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminCredentials, setAdminCredentials] = useState({
+    email: '',
+    password: ''
+  });
   
   const { login, loginWithGoogle, error } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -66,6 +72,37 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  const handleAdminLogin = async (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setIsLoading(true);
+    
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await axios.post(`${API_URL}/admin/login`, adminCredentials);
+      
+      if (response.data.status === 'success') {
+        localStorage.setItem('adminToken', response.data.token);
+        navigate('/admin');
+      } else {
+        setErrorMessage('Invalid admin credentials');
+      }
+    } catch (error) {
+      console.error('Admin login error:', error);
+      setErrorMessage(error.response?.data?.message || 'Invalid admin credentials');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAdminInputChange = (e) => {
+    const { name, value } = e.target;
+    setAdminCredentials(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
   
   return (
     <div className="login-container">
@@ -119,14 +156,58 @@ const Login = () => {
         </button>
       </div>
       
-      <div className="admin-login">
-        <button 
-          onClick={() => navigate('/admin')}
-          className="btn btn-admin"
-          type="button"
-        >
-          Login as Admin
-        </button>
+      <div className="admin-section">
+        {!showAdminLogin ? (
+          <button 
+            onClick={() => setShowAdminLogin(true)}
+            className="btn btn-admin-toggle"
+            type="button"
+          >
+            🔐 Admin Access
+          </button>
+        ) : (
+          <div className="admin-login-form">
+            <h3>Admin Login</h3>
+            <form onSubmit={handleAdminLogin}>
+              <div className="form-group">
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Admin Email"
+                  value={adminCredentials.email}
+                  onChange={handleAdminInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Admin Password"
+                  value={adminCredentials.password}
+                  onChange={handleAdminInputChange}
+                  required
+                />
+              </div>
+              <div className="admin-actions">
+                <button 
+                  type="submit" 
+                  className="btn btn-admin-login"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Logging in...' : 'Login as Admin'}
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setShowAdminLogin(false)}
+                  className="btn btn-admin-cancel"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
       
       <p className="register-link">

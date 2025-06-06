@@ -80,6 +80,76 @@ exports.login = async (req, res) => {
   }
 };
 
+// @desc    Frontend Admin Login
+// @route   POST /api/admin/login
+// @access  Public
+exports.adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate email and password
+    if (!email || !password) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide email and password',
+      });
+    }
+
+    // Check if credentials match hardcoded admin credentials
+    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'Invalid admin credentials',
+      });
+    }
+
+    // Find admin by email or create one if it doesn't exist
+    let admin = await Admin.findOne({ email });
+
+    if (!admin) {
+      // Create a mock Firebase UID using UUID
+      const mockFirebaseUid = uuidv4();
+
+      // Create admin in database
+      admin = await Admin.create({
+        email,
+        firebaseUid: mockFirebaseUid,
+        role: 'admin'
+      });
+      
+      console.log('Created new admin account:', admin._id);
+    } else {
+      console.log('Found existing admin account:', admin._id);
+    }
+
+    // Create token
+    const token = jwt.sign(
+      { adminId: admin._id, email: admin.email, role: admin.role },
+      process.env.ADMIN_JWT_SECRET || 'admin-secret-key-fallback',
+      { expiresIn: '1d' }
+    );
+
+    // Send token to client
+    res.status(200).json({
+      status: 'success',
+      token,
+      data: {
+        admin: {
+          id: admin._id,
+          email: admin.email,
+          role: admin.role
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Admin login error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error during login: ' + error.message,
+    });
+  }
+};
+
 // @desc    Verify admin token
 // @route   GET /api/admin/verify
 // @access  Private (Admin only)
@@ -110,6 +180,40 @@ exports.verifyToken = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Server error during token verification'
+    });
+  }
+};
+
+// @desc    Get admin profile
+// @route   GET /api/admin/profile
+// @access  Private (Admin only)
+exports.getAdminProfile = async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.admin.adminId);
+    
+    if (!admin) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Admin not found'
+      });
+    }
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        admin: {
+          id: admin._id,
+          email: admin.email,
+          role: admin.role,
+          createdAt: admin.createdAt
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get admin profile error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error getting admin profile'
     });
   }
 }; 

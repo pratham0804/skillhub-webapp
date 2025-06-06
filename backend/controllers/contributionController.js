@@ -4,9 +4,67 @@ const geminiService = require('../services/geminiService');
 const sheetsUpdateService = require('../services/sheetsUpdateService');
 const nodemailer = require('nodemailer');
 
+// Input sanitization function
+const sanitizeInput = (input) => {
+  if (typeof input !== 'string') return input;
+  
+  // Remove HTML tags and potentially malicious content
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+    .replace(/<[^>]*>/g, '') // Remove all HTML tags
+    .replace(/javascript:/gi, '') // Remove javascript: URLs
+    .replace(/on\w+\s*=/gi, '') // Remove event handlers
+    .trim();
+};
+
+// Sanitize object recursively
+const sanitizeObject = (obj) => {
+  if (typeof obj !== 'object' || obj === null) {
+    return sanitizeInput(obj);
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeObject(item));
+  }
+  
+  const sanitized = {};
+  for (const [key, value] of Object.entries(obj)) {
+    sanitized[key] = sanitizeObject(value);
+  }
+  return sanitized;
+};
+
+// Rate limiting storage (in-memory for simplicity)
+const rateLimitMap = new Map();
+
+// Rate limiting function (5 submissions per IP per hour)
+const checkRateLimit = (req) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  const hourInMs = 60 * 60 * 1000;
+  
+  if (!rateLimitMap.has(ip)) {
+    rateLimitMap.set(ip, []);
+  }
+  
+  const submissions = rateLimitMap.get(ip);
+  
+  // Remove submissions older than 1 hour
+  const recentSubmissions = submissions.filter(timestamp => now - timestamp < hourInMs);
+  rateLimitMap.set(ip, recentSubmissions);
+  
+  if (recentSubmissions.length >= 5) {
+    return false; // Rate limit exceeded
+  }
+  
+  // Add current submission
+  recentSubmissions.push(now);
+  return true;
+};
+
 // Create email transporter (commented out since we need actual credentials)
 /*
-const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransporter({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
@@ -18,6 +76,14 @@ const transporter = nodemailer.createTransport({
 // Submit a contribution
 exports.submitContribution = async (req, res) => {
   try {
+    // Rate limiting check
+    if (!checkRateLimit(req)) {
+      return res.status(429).json({
+        status: 'fail',
+        message: 'Too many submissions. Please try again later.'
+      });
+    }
+    
     const { type, data, email } = req.body;
     
     // Log the received contribution for debugging
@@ -41,11 +107,41 @@ exports.submitContribution = async (req, res) => {
       });
     }
     
+    // Sanitize all input data
+    const sanitizedEmail = sanitizeInput(email);
+    const sanitizedData = sanitizeObject(data);
+    const sanitizedType = sanitizeInput(type);
+    
+    // Validate contribution type
+    if (!['Skill', 'Tool'].includes(sanitizedType)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid contribution type'
+      });
+    }
+    
+    // Additional validation for required fields based on type
+    if (sanitizedType === 'Skill') {
+      if (!sanitizedData.skillName || !sanitizedData.category) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Skill name and category are required'
+        });
+      }
+    } else if (sanitizedType === 'Tool') {
+      if (!sanitizedData.toolName || !sanitizedData.category) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Tool name and category are required'
+        });
+      }
+    }
+    
     // Create a copy of the data object to avoid modifying the original
-    const processedData = { ...data };
+    const processedData = { ...sanitizedData };
     
     // Enhanced description with Gemini if keywords are provided
-    if (type === 'Skill' && processedData.descriptionKeywords) {
+    if (sanitizedType === 'Skill' && processedData.descriptionKeywords) {
       try {
         if (process.env.GEMINI_API_KEY) {
           processedData.learningResources = await geminiService.enhanceSkillDescription(
@@ -66,7 +162,7 @@ exports.submitContribution = async (req, res) => {
       }
       // Remove from data as it's processed
       delete processedData.descriptionKeywords;
-    } else if (type === 'Tool' && processedData.descriptionKeywords) {
+    } else if (sanitizedType === 'Tool' && processedData.descriptionKeywords) {
       try {
         if (process.env.GEMINI_API_KEY) {
           processedData.primaryUseCases = await geminiService.enhanceToolDescription(
@@ -91,9 +187,9 @@ exports.submitContribution = async (req, res) => {
     
     // Create new contribution
     const contribution = new Contribution({
-      type,
+      type: sanitizedType,
       data: processedData,
-      contributorEmail: email
+      contributorEmail: sanitizedEmail
     });
     
     await contribution.save();
@@ -107,11 +203,11 @@ exports.submitContribution = async (req, res) => {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: adminEmails.join(','),
-        subject: `New ${type} Contribution Submitted`,
-        text: `A new ${type} has been submitted for review.\n\nContributor: ${email}\n\nPlease login to the admin panel to review the submission.`,
-        html: `<h3>New ${type} Contribution</h3>
-               <p>A new ${type} has been submitted for review.</p>
-               <p><strong>Contributor:</strong> ${email}</p>
+        subject: `New ${sanitizedType} Contribution Submitted`,
+        text: `A new ${sanitizedType} has been submitted for review.\n\nContributor: ${sanitizedEmail}\n\nPlease login to the admin panel to review the submission.`,
+        html: `<h3>New ${sanitizedType} Contribution</h3>
+               <p>A new ${sanitizedType} has been submitted for review.</p>
+               <p><strong>Contributor:</strong> ${sanitizedEmail}</p>
                <p>Please login to the admin panel to review the submission.</p>`
       };
       

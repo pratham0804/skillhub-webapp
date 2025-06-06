@@ -97,10 +97,69 @@
   margin: 20px 0;
 }
 
-.admin-login {
+.admin-section {
   margin: 20px 0;
   padding-top: 20px;
   border-top: 1px solid #e5e7eb;
+}
+
+.btn-admin-toggle {
+  background: linear-gradient(135deg, #1f2937, #374151);
+  color: white;
+  border: 2px solid #6b7280;
+  font-size: 14px;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+}
+
+.btn-admin-toggle:hover {
+  background: linear-gradient(135deg, #374151, #4b5563);
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.3);
+}
+
+.admin-login-form {
+  margin-top: 15px;
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.admin-login-form h3 {
+  margin: 0 0 15px 0;
+  color: #374151;
+  font-size: 16px;
+  text-align: center;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-admin-login {
+  background-color: #059669;
+  color: white;
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.btn-admin-login:hover {
+  background-color: #047857;
+}
+
+.btn-admin-cancel {
+  background-color: #6b7280;
+  color: white;
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.btn-admin-cancel:hover {
+  background-color: #4b5563;
 }
 
 .error-message {
