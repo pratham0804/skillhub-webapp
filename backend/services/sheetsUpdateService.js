@@ -87,16 +87,16 @@ const formatNewRow = async (doc, sheet, rowNumber) => {
 // Get Google Sheets credentials
 const getCredentials = () => {
   try {
-    // For production: Use environment variables
-    if (process.env.NODE_ENV === 'production' && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
-      console.log('Using production environment variables for Google Sheets credentials');
+    // Try environment variables first (for production and configured local environments)
+    if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
+      console.log('Using environment variables for Google Sheets credentials');
       return {
         client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n')
       };
     }
     
-    // For local development: Use credentials.json file
+    // For local development: Use credentials.json file as fallback
     const credentialsPath = path.resolve(__dirname, '..', 'credentials.json');
     if (fs.existsSync(credentialsPath)) {
       console.log('Using local credentials.json for Google Sheets credentials');
@@ -107,6 +107,7 @@ const getCredentials = () => {
       };
     }
     
+    console.log('No Google Sheets credentials found in environment variables or credentials.json');
     return null;
     
   } catch (error) {
