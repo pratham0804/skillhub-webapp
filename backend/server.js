@@ -40,6 +40,8 @@ const corsOptions = {
       'http://localhost:3002',
       'http://localhost:5001',
       'http://localhost:5001/', // Add trailing slash version
+      'https://skillhub-webapp.vercel.app', // Production frontend URL
+      'https://skillhub-webapp.vercel.app/', // With trailing slash
       undefined // Allow requests with no origin (like mobile apps, curl, postman)
     ];
     
@@ -55,11 +57,13 @@ const corsOptions = {
       callback(null, true);
     } else {
       console.warn(`CORS blocked for origin: ${origin}`);
+      console.warn(`Allowed origins:`, allowedOrigins);
       callback(new Error(`Origin ${origin} not allowed by CORS`));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
   credentials: true,
   maxAge: 86400 // Cache preflight requests for 24 hours
 };
