@@ -108,6 +108,9 @@ const getCredentials = () => {
       // Handle different possible formats of the private key
       let privateKey = process.env.GOOGLE_PRIVATE_KEY;
       
+      // Remove surrounding quotes if present (common issue in environment variables)
+      privateKey = privateKey.replace(/^"(.*)"$/, '$1');
+      
       // If the key doesn't start with -----BEGIN, it might be incorrectly formatted
       if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
         console.warn('Private key does not contain proper BEGIN marker, attempting to fix format');
