@@ -87,12 +87,41 @@ const formatNewRow = async (doc, sheet, rowNumber) => {
 // Get Google Sheets credentials
 const getCredentials = () => {
   try {
+    // Debug: Log what environment variables are available
+    console.log('=== CREDENTIAL DEBUGGING ===');
+    console.log('GOOGLE_SERVICE_ACCOUNT_EMAIL exists:', !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
+    console.log('GOOGLE_PRIVATE_KEY exists:', !!process.env.GOOGLE_PRIVATE_KEY);
+    
+    if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+      console.log('GOOGLE_SERVICE_ACCOUNT_EMAIL value:', process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
+    }
+    
+    if (process.env.GOOGLE_PRIVATE_KEY) {
+      console.log('GOOGLE_PRIVATE_KEY length:', process.env.GOOGLE_PRIVATE_KEY.length);
+      console.log('GOOGLE_PRIVATE_KEY starts with:', process.env.GOOGLE_PRIVATE_KEY.substring(0, 50));
+    }
+    
     // Try environment variables first (for production and configured local environments)
     if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
       console.log('Using environment variables for Google Sheets credentials');
+      
+      // Handle different possible formats of the private key
+      let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+      
+      // If the key doesn't start with -----BEGIN, it might be incorrectly formatted
+      if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
+        console.warn('Private key does not contain proper BEGIN marker, attempting to fix format');
+      }
+      
+      // Replace escaped newlines with actual newlines
+      privateKey = privateKey.replace(/\\n/g, '\n');
+      
+      console.log('Processed private key starts with:', privateKey.substring(0, 50));
+      console.log('Processed private key ends with:', privateKey.substring(privateKey.length - 50));
+      
       return {
         client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n')
+        private_key: privateKey
       };
     }
     
@@ -108,6 +137,8 @@ const getCredentials = () => {
     }
     
     console.log('No Google Sheets credentials found in environment variables or credentials.json');
+    console.log('Available environment variables starting with GOOGLE_:', 
+      Object.keys(process.env).filter(key => key.startsWith('GOOGLE_')));
     return null;
     
   } catch (error) {
