@@ -355,6 +355,7 @@ button:disabled {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .skill-actions button {
@@ -365,24 +366,49 @@ button:disabled {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
+  min-width: 100px;
 }
 
-.skill-actions button:first-child {
+.skill-actions .add-skill-btn {
   background-color: #4a6cfa;
   color: white;
 }
 
-.skill-actions button:first-child:hover {
+.skill-actions .add-skill-btn:hover {
   background-color: #3a5cd9;
 }
 
 .skill-actions .resources-btn {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: #2196f3;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 .skill-actions .resources-btn:hover {
-  background-color: #e0e0e0;
+  background-color: #1976d2;
+}
+
+.skill-actions .resources-btn.small {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+  min-width: 80px;
+}
+
+.already-skilled {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+}
+
+.already-skilled .check-icon {
+  color: #4caf50;
+  font-weight: bold;
+  margin-right: 4px;
 }
 
 /* Enhanced Analysis */

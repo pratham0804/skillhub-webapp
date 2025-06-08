@@ -570,15 +570,30 @@ const SkillGapAnalysis = () => {
                           )}
                           <div className="skill-actions">
                             {!alreadyHasSkill ? (
-                              <button 
-                                onClick={() => handleAddSkill(skill.skillName)}
-                                disabled={loading}
-                              >
-                                {loading ? 'Adding...' : 'Add to My Skills'}
-                              </button>
+                              <>
+                                <button 
+                                  onClick={() => handleAddSkill(skill.skillName)}
+                                  disabled={loading}
+                                  className="add-skill-btn"
+                                >
+                                  {loading ? 'Adding...' : 'Add to My Skills'}
+                                </button>
+                                <button 
+                                  onClick={() => handleShowSkillResources(skill.skillName)}
+                                  className="resources-btn"
+                                >
+                                  📚 Resources
+                                </button>
+                              </>
                             ) : (
                               <div className="already-skilled">
                                 <span className="check-icon">✓</span> You're already skilled in this!
+                                <button 
+                                  onClick={() => handleShowSkillResources(skill.skillName)}
+                                  className="resources-btn small"
+                                >
+                                  📚 Resources
+                                </button>
                               </div>
                             )}
                           </div>
@@ -675,15 +690,30 @@ const SkillGapAnalysis = () => {
                       )}
                       <div className="skill-actions">
                         {!alreadyHasSkill ? (
-                          <button 
-                            onClick={() => handleAddSkill(skill.skillName)}
-                            disabled={loading}
-                          >
-                            {loading ? 'Adding...' : 'Add to My Skills'}
-                          </button>
+                          <>
+                            <button 
+                              onClick={() => handleAddSkill(skill.skillName)}
+                              disabled={loading}
+                              className="add-skill-btn"
+                            >
+                              {loading ? 'Adding...' : 'Add to My Skills'}
+                            </button>
+                            <button 
+                              onClick={() => handleShowSkillResources(skill.skillName)}
+                              className="resources-btn"
+                            >
+                              📚 Resources
+                            </button>
+                          </>
                         ) : (
                           <div className="already-skilled">
                             <span className="check-icon">✓</span> You're already skilled in this!
+                            <button 
+                              onClick={() => handleShowSkillResources(skill.skillName)}
+                              className="resources-btn small"
+                            >
+                              📚 Resources
+                            </button>
                           </div>
                         )}
                       </div>
@@ -727,6 +757,14 @@ const SkillGapAnalysis = () => {
                           <span className="level-label">Target:</span> 
                           <span className="level-value">Advanced</span>
                         </div>
+                      </div>
+                      <div className="skill-actions">
+                        <button 
+                          onClick={() => handleShowSkillResources(skill.skillName)}
+                          className="resources-btn"
+                        >
+                          📚 Learning Resources
+                        </button>
                       </div>
                     </div>
                   );

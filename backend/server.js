@@ -192,48 +192,11 @@ const startServer = (port) => {
 
 startServer(PORT);
 
-// TEMPORARY: Test YouTube API
-const testYouTubeAPI = async () => {
-  try {
-    console.log('\n===== TESTING YOUTUBE API =====');
-    const axios = require('axios');
-    const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
-    
-    if (!YOUTUBE_API_KEY) {
-      console.error('YouTube API key not configured in environment variables');
-      return;
-    }
-    
-    console.log('YouTube API Key found, making test request...');
-    
-    const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
-      params: {
-        part: 'snippet',
-        maxResults: 1,
-        q: 'javascript tutorial',
-        key: YOUTUBE_API_KEY
-      }
-    });
-    
-    if (response.status === 200) {
-      console.log('YouTube API test successful!');
-      console.log(`Response has ${response.data.items ? response.data.items.length : 0} items`);
-      if (response.data.items && response.data.items.length > 0) {
-        console.log('First result title:', response.data.items[0].snippet.title);
-      }
-    } else {
-      console.error('Unexpected response status:', response.status);
-    }
-  } catch (error) {
-    console.error('YouTube API test error:');
-    if (error.response) {
-      console.error('Status:', error.response.status);
-      console.error('Data:', JSON.stringify(error.response.data, null, 2));
-    } else {
-      console.error(error.message);
-    }
-  }
-};
-
-// Run the YouTube API test
-testYouTubeAPI(); 
+// YouTube API service is configured with fallback resources
+console.log('\n===== YOUTUBE API SERVICE STATUS =====');
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
+if (YOUTUBE_API_KEY) {
+  console.log('YouTube API Key configured - Service will attempt to use YouTube API with fallback to curated resources');
+} else {
+  console.log('YouTube API Key not configured - Service will use curated learning resources');
+} 

@@ -899,124 +899,359 @@ const generateDynamicResources = (skillName) => {
  * @param {string} query - The search query 
  * @returns {Promise<Array>} - Array of search results
  */
-async function searchYouTube(skill) {
-  console.log(`Searching YouTube for skill: ${skill}`);
-  const originalSkill = skill;
-  skill = skill.toLowerCase();
-  
-  // Extract significant keywords from the skill
-  const skillKeywords = skill.split(/\s+/).filter(k => 
-    !['and', 'the', 'of', 'for', 'in', 'on', 'with', 'to'].includes(k)
-  );
-  
-  // Determine if this is a compound skill (has multiple significant keywords)
-  const isCompoundSkill = skillKeywords.length > 1;
-  
-  // Special handling for REST API
-  const isRestApi = skill.includes('rest') && skill.includes('api');
-  
-  let recommendations = [];
-  
+const searchYouTube = async (query, maxResults = 10) => {
   try {
-    // First, try to get recommendations from Coursera
-    console.log(`Checking if Coursera API key is configured...`);
-    if (courseraService.isCourseraApiConfigured()) {
-      try {
-        console.log(`Searching Coursera for ${originalSkill}...`);
-        const courseraResults = await courseraService.searchCoursera(originalSkill);
-        
-        if (courseraResults && courseraResults.length > 0) {
-          console.log(`Found ${courseraResults.length} Coursera results for ${originalSkill}`);
-          recommendations = recommendations.concat(courseraResults);
-        } else {
-          console.log(`No Coursera results found for ${originalSkill}`);
-        }
-      } catch (courseraError) {
-        console.error('Error fetching from Coursera:', courseraError);
+    if (!YOUTUBE_API_KEY) {
+      console.warn('YouTube API Key not configured, returning fallback resources');
+      return getFallbackResources(query, maxResults);
+    }
+
+    const response = await axios.get(`${YOUTUBE_API_URL}/search`, {
+      params: {
+        part: 'snippet',
+        q: query,
+        type: 'video',
+        maxResults: maxResults,
+        order: 'relevance',
+        key: YOUTUBE_API_KEY
       }
+    });
+
+    if (!response.data.items || response.data.items.length === 0) {
+      console.warn('No YouTube results found, returning fallback resources');
+      return getFallbackResources(query, maxResults);
     }
+
+    const videoIds = response.data.items.map(item => item.id.videoId).join(',');
     
-    // Next, try YouTube API if configured
-    console.log(`Checking if YouTube API key is configured...`);
-    if (YOUTUBE_API_KEY) {
-      try {
-        // Create search queries based on skill type
-        let searchQueries = [];
-        
-        if (isRestApi) {
-          console.log(`Detected REST API as special case`);
-          searchQueries = [
-            'RESTful API tutorial',
-            'REST API design principles',
-            'REST API best practices'
-          ];
-        } else if (isCompoundSkill) {
-          console.log(`Detected compound skill with keywords: ${skillKeywords.join(', ')}`);
-          // For compound skills, create targeted queries
-          searchQueries = [
-            `${skill} tutorial`,
-            `learn ${skill} programming`,
-            `${skill} for beginners`
-          ];
-        } else {
-          console.log(`Detected single skill: ${skill}`);
-          // For simple skills, use the skill directly
-          searchQueries = [
-            `${skill} tutorial`,
-            `learn ${skill} programming`,
-            `${skill} for beginners`
-          ];
-        }
-        
-        // Try each search query until we get results
-        for (const query of searchQueries) {
-          console.log(`Trying YouTube query: "${query}"`);
-          const youtubeResults = await fetchFromYouTubeAPI(query);
-          
-          if (youtubeResults && youtubeResults.length > 0) {
-            console.log(`Found ${youtubeResults.length} YouTube results for query "${query}"`);
-            const enhancedResults = enhanceResourcesWithFormattedStats(youtubeResults);
-            recommendations = recommendations.concat(enhancedResults);
-            break; // Stop trying queries once we get results
-          }
-        }
-      } catch (youtubeError) {
-        console.error('Error fetching from YouTube:', youtubeError);
+    const videoDetailsResponse = await axios.get(`${YOUTUBE_API_URL}/videos`, {
+      params: {
+        part: 'statistics,contentDetails',
+        id: videoIds,
+        key: YOUTUBE_API_KEY
       }
-    } else {
-      console.log('YouTube API key not configured, skipping YouTube search');
-    }
-    
-    // If we have enough recommendations, return them
-    if (recommendations.length > 0) {
-      console.log(`Returning ${recommendations.length} recommendations for ${originalSkill}`);
-      return labelResourcesBySource(recommendations);
-    }
-    
-    // Fallback to mock data if available
-    console.log(`No recommendations found, checking fallback data for ${originalSkill}`);
-    const normalizedSkill = skill.replace(/\s+/g, '');
-    if (skillBasedCourses[originalSkill]) {
-      console.log(`Found fallback data for ${originalSkill}`);
-      return skillBasedCourses[originalSkill];
-    }
-    
-    // Check for partial matches in skillBasedCourses
-    for (const key in skillBasedCourses) {
-      if (key.toLowerCase().includes(skill) || skill.includes(key.toLowerCase())) {
-        console.log(`Found partial match in fallback data: ${key}`);
-        return skillBasedCourses[key];
-      }
-    }
-    
-    // Last resort - return empty array
-    console.log(`No recommendations found for ${originalSkill}`);
-    return [];
+    });
+
+    return response.data.items.map((item, index) => {
+      const videoDetails = videoDetailsResponse.data.items[index];
+      const statistics = videoDetails?.statistics || {};
+      const contentDetails = videoDetails?.contentDetails || {};
+
+      return {
+        title: item.snippet.title,
+        url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
+        description: item.snippet.description,
+        author: item.snippet.channelTitle,
+        publishedAt: item.snippet.publishedAt,
+        type: 'video',
+        source: 'YouTube',
+        viewCount: statistics.viewCount ? parseInt(statistics.viewCount) : 0,
+        likeCount: statistics.likeCount ? parseInt(statistics.likeCount) : 0,
+        duration: contentDetails.duration ? parseDuration(contentDetails.duration) : '',
+        formattedViews: formatViewCount(statistics.viewCount),
+        formattedLikes: formatViewCount(statistics.likeCount),
+        formattedDuration: contentDetails.duration ? formatDuration(contentDetails.duration) : '',
+        qualityIndicator: determineQualityIndicator(statistics)
+      };
+    });
+
   } catch (error) {
-    console.error('Error in searchYouTube function:', error);
-    return [];
+    console.error('YouTube API error:', error.response?.data || error.message);
+    console.warn('Falling back to curated resources due to API error');
+    return getFallbackResources(query, maxResults);
   }
-}
+};
+
+/**
+ * Get fallback resources when YouTube API is not available
+ * @param {string} query - Search query
+ * @param {number} maxResults - Maximum number of results
+ * @returns {Array} - Array of fallback learning resources
+ */
+const getFallbackResources = (query, maxResults = 10) => {
+  const normalizedQuery = query.toLowerCase();
+  
+  // Comprehensive fallback resources organized by technology
+  const fallbackResourcesDB = {
+    javascript: [
+      {
+        title: "JavaScript Full Course for Beginners | Complete All-in-One Tutorial",
+        url: "https://www.youtube.com/watch?v=PkZNo7MFNFg",
+        author: "Dave Gray",
+        description: "Learn modern JavaScript from the very beginning. This tutorial covers variables, functions, objects, classes, and more.",
+        thumbnail: "https://i.ytimg.com/vi/PkZNo7MFNFg/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "2.1M+",
+        formattedDuration: "8:22:03",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "Learn JavaScript - Full Course for Beginners",
+        url: "https://www.youtube.com/watch?v=PkZNo7MFNFg",
+        author: "freeCodeCamp.org",
+        description: "This complete 134-part JavaScript tutorial for beginners will teach you everything you need to know to get started with the JavaScript programming language.",
+        thumbnail: "https://i.ytimg.com/vi/PkZNo7MFNFg/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "8.2M+",
+        formattedDuration: "3:26:42",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "MDN Web Docs - JavaScript",
+        url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+        author: "Mozilla",
+        description: "Comprehensive JavaScript documentation and learning resources from Mozilla Developer Network.",
+        thumbnail: "https://developer.mozilla.org/mdn-social-share.cd6c4a5a.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
+    ],
+    python: [
+      {
+        title: "Python for Beginners - Full Course",
+        url: "https://www.youtube.com/watch?v=rfscVS0vtbw",
+        author: "freeCodeCamp",
+        description: "Learn Python basics in this comprehensive course for beginners.",
+        thumbnail: "https://i.ytimg.com/vi/rfscVS0vtbw/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "4.5M+",
+        formattedDuration: "4:26:51",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "Python Tutorial - Python Full Course for Beginners",
+        url: "https://www.youtube.com/watch?v=_uQrJ0TkZlc",
+        author: "Programming with Mosh",
+        description: "Python tutorial for beginners - Learn Python for machine learning and web development.",
+        thumbnail: "https://i.ytimg.com/vi/_uQrJ0TkZlc/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "23M+",
+        formattedDuration: "6:14:07",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "Python Documentation",
+        url: "https://docs.python.org/3/",
+        author: "Python.org",
+        description: "Official Python documentation with tutorials, library references, and language syntax.",
+        thumbnail: "https://www.python.org/static/opengraph-icon-200x200.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
+    ],
+    react: [
+      {
+        title: "React Course - Beginner's Tutorial for React JavaScript Library",
+        url: "https://www.youtube.com/watch?v=bMknfKXIFA8",
+        author: "freeCodeCamp.org",
+        description: "Learn React JS in this full course for beginners. Work with components, props, state, hooks, and more.",
+        thumbnail: "https://i.ytimg.com/vi/bMknfKXIFA8/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "5.8M+",
+        formattedDuration: "11:55:27",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "React Documentation",
+        url: "https://react.dev/",
+        author: "React Team",
+        description: "Official React documentation with guides, API reference, and interactive tutorials.",
+        thumbnail: "https://react.dev/images/og-home.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
+    ],
+    nodejs: [
+      {
+        title: "Node.js Tutorial for Beginners: Learn Node in 1 Hour",
+        url: "https://www.youtube.com/watch?v=TlB_eWDSMt4",
+        author: "Programming with Mosh",
+        description: "Node.js tutorial for beginners - Learn the basics of Node.js in this crash course.",
+        thumbnail: "https://i.ytimg.com/vi/TlB_eWDSMt4/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "3.2M+",
+        formattedDuration: "1:08:35",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "Node.js Documentation",
+        url: "https://nodejs.org/en/docs/",
+        author: "Node.js Foundation",
+        description: "Official Node.js documentation with API reference, guides, and best practices.",
+        thumbnail: "https://nodejs.org/static/images/logo-hexagon-card.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
+    ],
+    html: [
+      {
+        title: "HTML Full Course - Build a Website Tutorial",
+        url: "https://www.youtube.com/watch?v=pQN-pnXPaVg",
+        author: "freeCodeCamp.org",
+        description: "Learn HTML in this complete course for beginners. Build a complete website from scratch.",
+        thumbnail: "https://i.ytimg.com/vi/pQN-pnXPaVg/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "2.8M+",
+        formattedDuration: "2:04:49",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "MDN Web Docs - HTML",
+        url: "https://developer.mozilla.org/en-US/docs/Web/HTML",
+        author: "Mozilla",
+        description: "Comprehensive HTML documentation and learning resources.",
+        thumbnail: "https://developer.mozilla.org/mdn-social-share.cd6c4a5a.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
+    ],
+    css: [
+      {
+        title: "CSS Tutorial - Zero to Hero (Complete Course)",
+        url: "https://www.youtube.com/watch?v=1Rs2ND1ryYc",
+        author: "freeCodeCamp.org",
+        description: "Learn CSS from scratch in this complete course. Master layouts, animations, and responsive design.",
+        thumbnail: "https://i.ytimg.com/vi/1Rs2ND1ryYc/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "1.9M+",
+        formattedDuration: "11:29:54",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "MDN Web Docs - CSS",
+        url: "https://developer.mozilla.org/en-US/docs/Web/CSS",
+        author: "Mozilla",
+        description: "Complete CSS documentation with guides, references, and examples.",
+        thumbnail: "https://developer.mozilla.org/mdn-social-share.cd6c4a5a.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
+    ]
+  };
+
+  // Add more technologies as needed
+  const defaultTech = [
+    {
+      title: "Complete Web Development Course - HTML, CSS, JavaScript",
+      url: "https://www.youtube.com/watch?v=nu_pCVPKzTk",
+      author: "freeCodeCamp.org",
+      description: "Learn web development from scratch with HTML, CSS, and JavaScript in this comprehensive course.",
+      thumbnail: "https://i.ytimg.com/vi/nu_pCVPKzTk/hqdefault.jpg",
+      type: "video",
+      source: "YouTube",
+      formattedViews: "1.8M+",
+      formattedDuration: "4:11:05",
+      qualityIndicator: "Recommended"
+    },
+    {
+      title: "Programming Tutorial Documentation",
+      url: "https://www.w3schools.com/",
+      author: "W3Schools",
+      description: "Free tutorials and references for web development technologies.",
+      thumbnail: "https://www.w3schools.com/images/w3schools_logo_436_2.png",
+      type: "documentation",
+      source: "Documentation",
+      qualityIndicator: "Helpful"
+    }
+  ];
+
+  // Find matching resources based on query
+  let matchedResources = [];
+  
+  // Check for specific technology matches
+  for (const [tech, resources] of Object.entries(fallbackResourcesDB)) {
+    if (normalizedQuery.includes(tech) || tech.includes(normalizedQuery)) {
+      matchedResources = [...matchedResources, ...resources];
+    }
+  }
+
+  // If no specific matches found, use default
+  if (matchedResources.length === 0) {
+    matchedResources = defaultTech;
+  }
+
+  return matchedResources.slice(0, maxResults);
+};
+
+/**
+ * Format view count for display
+ * @param {string|number} viewCount - Raw view count
+ * @returns {string} - Formatted view count
+ */
+const formatViewCount = (viewCount) => {
+  if (!viewCount) return '';
+  
+  const count = parseInt(viewCount);
+  if (count >= 1000000) {
+    return (count / 1000000).toFixed(1) + 'M+';
+  } else if (count >= 1000) {
+    return (count / 1000).toFixed(1) + 'K+';
+  }
+  return count.toString();
+};
+
+/**
+ * Parse ISO 8601 duration to readable format
+ * @param {string} duration - ISO 8601 duration string
+ * @returns {string} - Formatted duration
+ */
+const parseDuration = (duration) => {
+  if (!duration) return '';
+  
+  const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+  if (!match) return '';
+  
+  const hours = match[1] ? parseInt(match[1].replace('H', '')) : 0;
+  const minutes = match[2] ? parseInt(match[2].replace('M', '')) : 0;
+  const seconds = match[3] ? parseInt(match[3].replace('S', '')) : 0;
+  
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  } else {
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+};
+
+/**
+ * Determine quality indicator based on statistics
+ * @param {object} statistics - Video statistics
+ * @returns {string} - Quality indicator
+ */
+const determineQualityIndicator = (statistics) => {
+  if (!statistics || !statistics.viewCount) {
+    return 'New';
+  }
+  
+  const views = parseInt(statistics.viewCount);
+  const likes = parseInt(statistics.likeCount || '0');
+  
+  const likeRatio = views > 0 ? (likes / views) : 0;
+  
+  if (views > 1000000 && likeRatio > 0.01) {
+    return 'Highly Recommended';
+  } else if (views > 100000 && likeRatio > 0.005) {
+    return 'Recommended';
+  } else if (views > 10000) {
+    return 'Popular';
+  } else {
+    return 'New';
+  }
+};
 
 module.exports = {
   getRecommendationsForRole,
