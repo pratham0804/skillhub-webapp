@@ -717,6 +717,14 @@ const SkillGapAnalysis = () => {
                           </div>
                         )}
                       </div>
+                      {selectedSkill === skill.skillName && (
+                        <div className="resource-container">
+                          {SkillResources && typeof SkillResources === 'function' ? 
+                            <SkillResources skillName={skill.skillName} /> : 
+                            <p>Loading resources...</p>
+                          }
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -766,6 +774,14 @@ const SkillGapAnalysis = () => {
                           📚 Learning Resources
                         </button>
                       </div>
+                      {selectedSkill === skill.skillName && (
+                        <div className="resource-container">
+                          {SkillResources && typeof SkillResources === 'function' ? 
+                            <SkillResources skillName={skill.skillName} /> : 
+                            <p>Loading resources...</p>
+                          }
+                        </div>
+                      )}
                     </div>
                   );
                 })}

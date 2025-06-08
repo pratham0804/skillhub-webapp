@@ -411,6 +411,14 @@ button:disabled {
   margin-right: 4px;
 }
 
+.resource-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
 /* Enhanced Analysis */
 .enhanced-analysis {
   margin-top: 2rem;

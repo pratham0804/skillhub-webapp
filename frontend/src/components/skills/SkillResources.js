@@ -58,7 +58,10 @@ const SkillResources = ({ skillName }) => {
       
       try {
         // Always use the skill-specific endpoint for direct skill resource matching
-        const response = await api.get(`/learning/skill/${encodeURIComponent(skillName)}`);
+        const url = `/learning/skill/${encodeURIComponent(skillName)}`;
+        console.log('Making API request to:', url); // Debug
+        const response = await api.get(url);
+        console.log('API response:', response.data); // Debug
         
         if (response.data && (response.data.success || response.data.status === 'success')) {
           // Extract resources data from the response
