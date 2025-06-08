@@ -132,20 +132,75 @@ const roleBasedCourses = {
 
 // Skill based courses
 const skillBasedCourses = {
+  'Java Core (JDK)': [
+    {
+      title: 'Java Programming Tutorial for Beginners',
+      url: 'https://www.youtube.com/watch?v=eIrMbAQSU34',
+      thumbnail: 'https://i.ytimg.com/vi/eIrMbAQSU34/hqdefault.jpg',
+      author: 'Programming with Mosh',
+      description: 'Learn Java programming from scratch in this comprehensive guide.',
+      type: 'video',
+      source: 'YouTube',
+      qualityScore: 18,
+      qualityIndicator: 'Highly Recommended',
+      formattedViews: '5.2M',
+      formattedLikes: '120K',
+      formattedDuration: '2:30:45'
+    },
+    {
+      title: 'Java Full Course 2024',
+      url: 'https://www.youtube.com/watch?v=CFD9EFcNZTQ',
+      thumbnail: 'https://i.ytimg.com/vi/CFD9EFcNZTQ/hqdefault.jpg',
+      author: 'freeCodeCamp.org',
+      description: 'Complete Java course covering core concepts, OOP, and advanced features.',
+      type: 'video',
+      source: 'YouTube',
+      qualityScore: 17,
+      qualityIndicator: 'Highly Recommended',
+      formattedViews: '1.8M',
+      formattedLikes: '45K',
+      formattedDuration: '12:00:00'
+    },
+    {
+      title: 'Java Documentation',
+      url: 'https://docs.oracle.com/en/java/',
+      thumbnail: 'https://www.oracle.com/a/ocom/img/rc24/java-logo-vert-blk.png',
+      author: 'Oracle',
+      description: 'Official Java documentation with tutorials, API references, and best practices.',
+      type: 'documentation',
+      source: 'documentation',
+      qualityScore: 19,
+      qualityIndicator: 'Highly Recommended'
+    }
+  ],
   'JavaScript': [
     {
       title: 'JavaScript Full Course for Beginners',
       url: 'https://www.youtube.com/watch?v=PkZNo7MFNFg',
       thumbnail: 'https://i.ytimg.com/vi/PkZNo7MFNFg/hqdefault.jpg',
       author: 'freeCodeCamp',
-      description: 'Learn JavaScript from scratch in this 3-hour comprehensive course.'
+      description: 'Learn JavaScript from scratch in this 3-hour comprehensive course.',
+      type: 'video',
+      source: 'youtube',
+      qualityScore: 18,
+      qualityIndicator: 'Highly Recommended',
+      formattedViews: '2.1M',
+      formattedLikes: '45K',
+      formattedDuration: '3:12:36'
     },
     {
       title: 'JavaScript Tutorial for Beginners',
       url: 'https://www.youtube.com/watch?v=W6NZfCO5SIk',
       thumbnail: 'https://i.ytimg.com/vi/W6NZfCO5SIk/hqdefault.jpg',
       author: 'Programming with Mosh',
-      description: 'JavaScript basics for beginners: learn JavaScript fundamentals in 1 hour.'
+      description: 'JavaScript basics for beginners: learn JavaScript fundamentals in 1 hour.',
+      type: 'video',
+      source: 'youtube',
+      qualityScore: 16,
+      qualityIndicator: 'Recommended',
+      formattedViews: '3.5M',
+      formattedLikes: '98K',
+      formattedDuration: '1:00:15'
     },
     {
       title: 'JavaScript Documentation',
@@ -153,7 +208,10 @@ const skillBasedCourses = {
       thumbnail: 'https://developer.mozilla.org/mdn-social-share.cd6c4a5a.png',
       author: 'MDN Web Docs',
       description: 'Official JavaScript documentation with guides, references, and examples.',
-      type: 'documentation'
+      type: 'documentation',
+      source: 'documentation',
+      qualityScore: 19,
+      qualityIndicator: 'Highly Recommended'
     }
   ],
   'React': [
@@ -162,14 +220,28 @@ const skillBasedCourses = {
       url: 'https://www.youtube.com/watch?v=RVFAyFWO4go',
       thumbnail: 'https://i.ytimg.com/vi/RVFAyFWO4go/hqdefault.jpg',
       author: 'freeCodeCamp',
-      description: 'Learn React from scratch in this comprehensive guide for beginners.'
+      description: 'Learn React from scratch in this comprehensive guide for beginners.',
+      type: 'video',
+      source: 'YouTube',
+      qualityScore: 17,
+      qualityIndicator: 'Highly Recommended',
+      formattedViews: '1.8M',
+      formattedLikes: '52K',
+      formattedDuration: '11:55:23'
     },
     {
       title: 'React Tutorial for Beginners',
       url: 'https://www.youtube.com/watch?v=SqcY0GlETPk',
       thumbnail: 'https://i.ytimg.com/vi/SqcY0GlETPk/hqdefault.jpg',
       author: 'Programming with Mosh',
-      description: 'Learn React fundamentals in this beginner-friendly tutorial.'
+      description: 'Learn React fundamentals in this beginner-friendly tutorial.',
+      type: 'video',
+      source: 'YouTube',
+      qualityScore: 16,
+      qualityIndicator: 'Recommended',
+      formattedViews: '2.3M',
+      formattedLikes: '74K',
+      formattedDuration: '1:18:47'
     },
     {
       title: 'React Documentation',
@@ -177,7 +249,10 @@ const skillBasedCourses = {
       thumbnail: 'https://react.dev/images/og-home.png',
       author: 'React Team',
       description: 'Official React documentation with guides, API references, and examples.',
-      type: 'documentation'
+      type: 'documentation',
+      source: 'documentation',
+      qualityScore: 19,
+      qualityIndicator: 'Highly Recommended'
     }
   ],
   'Python': [
@@ -186,14 +261,28 @@ const skillBasedCourses = {
       url: 'https://www.youtube.com/watch?v=rfscVS0vtbw',
       thumbnail: 'https://i.ytimg.com/vi/rfscVS0vtbw/hqdefault.jpg',
       author: 'freeCodeCamp',
-      description: 'Learn Python - Full Course for Beginners'
+      description: 'Learn Python - Full Course for Beginners',
+      type: 'video',
+      source: 'YouTube',
+      qualityScore: 17,
+      qualityIndicator: 'Highly Recommended',
+      formattedViews: '14M',
+      formattedLikes: '380K',
+      formattedDuration: '4:26:52'
     },
     {
       title: 'Python Tutorial - Python Full Course for Beginners',
       url: 'https://www.youtube.com/watch?v=_uQrJ0TkZlc',
       thumbnail: 'https://i.ytimg.com/vi/_uQrJ0TkZlc/hqdefault.jpg',
       author: 'Programming with Mosh',
-      description: 'Python tutorial for beginners - Learn Python for machine learning and web development.'
+      description: 'Python tutorial for beginners - Learn Python for machine learning and web development.',
+      type: 'video',
+      source: 'YouTube',
+      qualityScore: 16,
+      qualityIndicator: 'Recommended',
+      formattedViews: '10M',
+      formattedLikes: '320K',
+      formattedDuration: '6:14:07'
     },
     {
       title: 'Python Documentation',
