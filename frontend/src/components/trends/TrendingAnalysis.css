@@ -740,6 +740,12 @@
   100% { transform: rotate(360deg); }
 }
 
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
 .trending-loading p {
   font-size: 1.1rem;
   color: #64748b;

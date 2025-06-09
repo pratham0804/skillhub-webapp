@@ -36,7 +36,9 @@ import {
   DialogContent,
   DialogActions,
   Badge,
-  Rating
+  Rating,
+  Collapse,
+  Fab
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -63,7 +65,13 @@ import {
   VisibilityOff as VisibilityOffIcon,
   Upload as UploadIcon,
   Star as StarIcon,
-  Tune as TuneIcon
+  Tune as TuneIcon,
+  Analytics as AnalyticsIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon,
+  Search as SearchIcon,
+  FilterList as FilterListIcon,
+  Assignment as AssignmentIcon
 } from '@mui/icons-material';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 
@@ -333,71 +341,120 @@ const GlowingChip = styled(Chip)(({ theme, glowcolor }) => ({
   }
 }));
 
-const EnhancedSkillChip = styled(Chip)(({ theme, skillcolor, proficiency }) => {
+const EnhancedSkillChip = styled(Chip)(({ theme, proficiency, skillcolor }) => {
   const proficiencyColors = {
-    Beginner: { bg: '#e0e7ff', color: '#4338ca', border: '#6366f1' },      // Indigo theme
-    Intermediate: { bg: '#dbeafe', color: '#2563eb', border: '#3b82f6' },  // Blue theme  
-    Advanced: { bg: '#d1fae5', color: '#059669', border: '#10b981' },      // Emerald theme
-    Expert: { bg: '#ede9fe', color: '#7c3aed', border: '#8b5cf6' },        // Purple theme
+    Beginner: { bg: '#e0e7ff', color: '#4338ca', border: '#c7d2fe' },
+    Intermediate: { bg: '#dbeafe', color: '#2563eb', border: '#bfdbfe' },
+    Advanced: { bg: '#d1fae5', color: '#059669', border: '#a7f3d0' },
+    Expert: { bg: '#ede9fe', color: '#7c3aed', border: '#ddd6fe' },
   };
   
-  const colors = proficiencyColors[proficiency] || proficiencyColors.Intermediate;
+  const colors = proficiencyColors[proficiency] || proficiencyColors.Beginner;
   
   return {
     backgroundColor: colors.bg,
     color: colors.color,
-    border: `1px solid ${colors.border}30`,
+    border: `1px solid ${colors.border}`,
     fontWeight: 500,
-    fontSize: '14px',
-    height: 40,
-    px: 2,
-    position: 'relative',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    '&::after': {
-      content: `"${proficiency}"`,
-      position: 'absolute',
-      top: -8,
-      right: -8,
-      backgroundColor: colors.border,
-      color: 'white',
-      fontSize: '10px',
-      fontWeight: 600,
-      padding: '2px 6px',
-      borderRadius: '8px',
-      lineHeight: 1,
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    fontSize: '0.75rem',
+    height: 32,
+    borderRadius: 8,
+    transition: 'all 0.2s ease',
+    '& .MuiChip-deleteIcon': {
+      color: colors.color,
+      fontSize: '16px',
+      '&:hover': {
+        color: '#ef4444',
+      },
     },
     '&:hover': {
-      transform: 'translateY(-3px) scale(1.02)',
+      transform: 'scale(1.05)',
       backgroundColor: colors.color,
       color: 'white',
-      border: `1px solid ${colors.border}`,
-      boxShadow: `0 8px 25px ${colors.border}40, 0 0 0 1px ${colors.border}20`,
-      '&::after': {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        color: colors.color,
-      },
       '& .MuiChip-deleteIcon': {
-        color: 'rgba(255, 255, 255, 0.9)',
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: '50%',
-        '&:hover': {
-          backgroundColor: 'rgba(244, 67, 54, 0.2)',
-          color: '#fff',
-        }
-      }
+        color: 'white',
+      },
     },
-    '& .MuiChip-deleteIcon': {
-      color: `${colors.border}80`,
-      transition: 'all 0.2s ease',
-      '&:hover': {
-        color: theme.palette.error.main,
-        backgroundColor: 'rgba(244, 67, 54, 0.1)',
-        borderRadius: '50%'
-      }
-    }
   };
 });
+
+// Enhanced Styled Components for better UX
+const FloatingActionButton = styled(Fab)(({ theme }) => ({
+  position: 'fixed',
+  bottom: 32,
+  right: 32,
+  zIndex: 1000,
+  background: 'linear-gradient(135deg, #4f46e5 0%, #10b981 100%)',
+  color: 'white',
+  fontWeight: 600,
+  fontSize: '0.875rem',
+  padding: '0 24px',
+  height: 56,
+  borderRadius: 28,
+  boxShadow: '0 8px 32px rgba(79, 70, 229, 0.3)',
+  '&:hover': {
+    background: 'linear-gradient(135deg, #4338ca 0%, #059669 100%)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 12px 40px rgba(79, 70, 229, 0.4)',
+  },
+  '& .MuiFab-label': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1,
+  },
+}));
+
+const SkillCategoryCard = styled(Card)(({ theme, expanded }) => ({
+  marginBottom: theme.spacing(3),
+  background: 'white',
+  borderRadius: 16,
+  border: '1px solid #e2e8f0',
+  borderLeft: '4px solid #4f46e5',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  overflow: 'hidden',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+    borderLeftColor: '#10b981',
+  },
+  ...(expanded && {
+    borderLeftColor: '#10b981',
+    boxShadow: '0 8px 25px rgba(16, 185, 129, 0.1)',
+  }),
+}));
+
+const DashboardOverviewCard = styled(Card)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #4f46e5 0%, #10b981 100%)',
+  color: 'white',
+  borderRadius: 16,
+  padding: theme.spacing(3),
+  marginBottom: theme.spacing(4),
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 'inherit',
+  },
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 20px 40px rgba(79, 70, 229, 0.3)',
+  },
+}));
+
+const SkillSearchCard = styled(Card)(({ theme }) => ({
+  background: 'rgba(255, 255, 255, 0.9)',
+  backdropFilter: 'blur(20px)',
+  borderRadius: 16,
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  marginBottom: theme.spacing(3),
+  padding: theme.spacing(2),
+}));
 
 // Skeleton Loading Component
 const SkeletonCard = ({ height = 120 }) => (
@@ -462,6 +519,7 @@ const UserProfile = () => {
   const [extractionLoading, setExtractionLoading] = useState(false);
   const [editingExtractedSkill, setEditingExtractedSkill] = useState(null);
   const [editingExtractedIndex, setEditingExtractedIndex] = useState(-1);
+  const [expandedCategories, setExpandedCategories] = useState({});
 
   // Configuration data
   const proficiencyLevels = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
@@ -951,6 +1009,25 @@ const UserProfile = () => {
     // Default to Technical
     return 'Technical';
   };
+
+  // Toggle category expansion
+  const toggleCategoryExpansion = (categoryIndex) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [categoryIndex]: !prev[categoryIndex]
+    }));
+  };
+
+  // Initialize expanded categories (first 2 expanded by default)
+  useEffect(() => {
+    if (categorizedSkills.length > 0 && Object.keys(expandedCategories).length === 0) {
+      const initialExpanded = {};
+      categorizedSkills.forEach((_, index) => {
+        initialExpanded[index] = index < 2; // Expand first 2 categories
+      });
+      setExpandedCategories(initialExpanded);
+    }
+  }, [categorizedSkills, expandedCategories]);
 
   if (loading) {
     return (
@@ -2122,246 +2199,286 @@ const UserProfile = () => {
             {activeTab === 1 && (
               <Slide direction="left" in timeout={600}>
                 <Box>
-                  {/* Skills Header with Actions */}
-                  <Box 
-                    display="flex" 
-                    justifyContent="space-between" 
-                    alignItems="center" 
-                    mb={4}
-                    sx={{
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      gap: { xs: 2, sm: 0 }
-                    }}
-                  >
-                    <Typography 
-                      variant="h5" 
-                      sx={{ 
-                        fontWeight: 600,
-                        color: '#1e293b'
-                      }}
-                    >
-                      Skills Management
-                    </Typography>
-                    
-                    <Box display="flex" gap={2} alignItems="center">
+                  {/* Skills Dashboard Overview */}
+                  <DashboardOverviewCard>
+                    <Grid container spacing={3} alignItems="center">
+                      <Grid item xs={12} md={8}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                          Skills Dashboard
+                        </Typography>
+                        <Typography variant="body1" sx={{ opacity: 0.9, mb: 2 }}>
+                          Manage your skills and discover growth opportunities
+                        </Typography>
+                        <Box display="flex" gap={3} flexWrap="wrap">
+                          <Box>
+                            <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                              {getSkillStats().total}
+                            </Typography>
+                            <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                              Total Skills
+                            </Typography>
+                          </Box>
+                          <Box>
+                            <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                              {user.existingSkills?.filter(s => ['Advanced', 'Expert'].includes(s.proficiency)).length || 0}
+                            </Typography>
+                            <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                              Advanced+
+                            </Typography>
+                          </Box>
+                          <Box>
+                            <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                              {categorizedSkills.length}
+                            </Typography>
+                            <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                              Categories
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} md={4} textAlign="center">
+                        <Button
+                          component={Link}
+                          to="/skill-gap-analysis"
+                          variant="contained"
+                          size="large"
+                          startIcon={<AnalyticsIcon />}
+                          sx={{
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            backdropFilter: 'blur(10px)',
+                            color: 'white',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            borderRadius: '12px',
+                            px: 4,
+                            py: 1.5,
+                            fontSize: '1rem',
+                            fontWeight: 600,
+                            '&:hover': {
+                              background: 'rgba(255, 255, 255, 0.3)',
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 8px 25px rgba(255, 255, 255, 0.2)',
+                            }
+                          }}
+                        >
+                          Run Skill Gap Analysis
+                        </Button>
+                        <Typography variant="caption" display="block" sx={{ mt: 1, opacity: 0.8 }}>
+                          Discover skills needed for your career goals
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </DashboardOverviewCard>
+
+                  {/* Skills Search and Filter */}
+                  <SkillSearchCard>
+                    <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
+                      <TextField
+                        placeholder="Search skills..."
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          startAdornment: <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />,
+                        }}
+                        sx={{ minWidth: 200, flex: 1 }}
+                      />
                       <Button
-                        variant="contained"
+                        variant="outlined"
                         startIcon={<AddIcon />}
                         onClick={() => setShowSkillDialog(true)}
                         sx={{
-                          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                          borderRadius: '8px',
-                          px: 3,
-                          py: 1,
-                          fontWeight: 500,
+                          borderColor: '#4f46e5',
+                          color: '#4f46e5',
                           '&:hover': {
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                            borderColor: '#3730a3',
+                            backgroundColor: 'rgba(79, 70, 229, 0.04)',
                           }
                         }}
                       >
                         Add Skill
                       </Button>
-                      
                       <Button
                         variant="outlined"
                         startIcon={<UploadIcon />}
                         onClick={() => setShowResumeDialog(true)}
                         sx={{
-                          borderColor: '#3b82f6',
-                          color: '#3b82f6',
-                          borderRadius: '8px',
-                          px: 3,
-                          py: 1,
-                          fontWeight: 500,
+                          borderColor: '#10b981',
+                          color: '#10b981',
                           '&:hover': {
-                            borderColor: '#2563eb',
-                            backgroundColor: 'rgba(59, 130, 246, 0.04)',
-                            transform: 'translateY(-1px)'
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(16, 185, 129, 0.04)',
                           }
                         }}
                       >
                         Extract from Resume
                       </Button>
-                      
-                      <Tooltip title="Filter & Sort">
-                        <IconButton
-                          sx={{
-                            bgcolor: 'white',
-                            border: '1px solid #e2e8f0',
-                            '&:hover': { bgcolor: 'grey.50' }
-                          }}
-                        >
-                          <TuneIcon />
-                        </IconButton>
-                      </Tooltip>
                     </Box>
-                  </Box>
+                  </SkillSearchCard>
 
-                  {/* Skills Overview Stats */}
-                  <Fade in timeout={800}>
-                    <Grid container spacing={3} sx={{ mb: 4 }}>
-                      <Grid item xs={6} sm={3}>
-                        <AnimatedCard sx={{
-                          background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                          color: 'white',
-                          textAlign: 'center',
-                          p: 3,
-                          borderRadius: '12px',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: '0 8px 25px rgba(59, 130, 246, 0.3)'
-                          }
-                        }}>
-                          <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>
-                            {getSkillStats().total}
-                          </Typography>
-                          <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                            Total Skills
-                          </Typography>
-                        </AnimatedCard>
-                      </Grid>
-                      
-                      <Grid item xs={6} sm={3}>
-                        <AnimatedCard sx={{
-                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                          color: 'white',
-                          textAlign: 'center',
-                          p: 3,
-                          borderRadius: '12px',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: '0 8px 25px rgba(16, 185, 129, 0.3)'
-                          }
-                        }}>
-                          <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>
-                            {user.existingSkills?.filter(s => ['Advanced', 'Expert'].includes(s.proficiency)).length || 0}
-                          </Typography>
-                          <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                            Advanced+
-                          </Typography>
-                        </AnimatedCard>
-                      </Grid>
-                      
-                      <Grid item xs={6} sm={3}>
-                        <AnimatedCard sx={{
-                          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                          color: 'white',
-                          textAlign: 'center',
-                          p: 3,
-                          borderRadius: '12px',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: '0 8px 25px rgba(245, 158, 11, 0.3)'
-                          }
-                        }}>
-                          <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>
-                            {categorizedSkills.length}
-                          </Typography>
-                          <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                            Categories
-                          </Typography>
-                        </AnimatedCard>
-                      </Grid>
-                      
-                      <Grid item xs={6} sm={3}>
-                        <AnimatedCard sx={{
-                          background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                          color: 'white',
-                          textAlign: 'center',
-                          p: 3,
-                          borderRadius: '12px',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: '0 8px 25px rgba(139, 92, 246, 0.3)'
-                          }
-                        }}>
-                          <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>
-                            {Math.round(getProfileCompletion())}%
-                          </Typography>
-                          <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                            Profile
-                          </Typography>
-                        </AnimatedCard>
-                      </Grid>
-                    </Grid>
-                  </Fade>
+
 
                   {/* Skills by Category */}
                   {user.existingSkills && user.existingSkills.length > 0 ? (
                     <Fade in timeout={1000}>
                       <Box>
-                        {categorizedSkills.map((category, categoryIndex) => (
-                          <AnimatedCard 
-                            key={categoryIndex}
-                            sx={{ 
-                              mb: 4,
-                              background: 'white',
-                              borderRadius: '12px',
-                              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                              border: '1px solid #e2e8f0',
-                              borderLeft: `4px solid ${getCategoryColor(category.name)}`,
-                              '&:hover': {
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                transform: 'translateY(-2px)'
-                              }
-                            }}
-                          >
-                            <CardContent sx={{ p: 4 }}>
-                              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                                <Box display="flex" alignItems="center" gap={2}>
-                                  <Box
-                                    sx={{
-                                      width: 12,
-                                      height: 12,
-                                      borderRadius: '50%',
-                                      bgcolor: getCategoryColor(category.name)
-                                    }}
-                                  />
-                                  <Typography 
-                                    variant="h6" 
-                                    sx={{ 
-                                      fontSize: '18px',
-                                      fontWeight: 600,
-                                      color: '#1e293b'
-                                    }}
-                                  >
-                                    {category.name}
-                                  </Typography>
-                                  <Chip 
-                                    size="small" 
-                                    label={`${category.skills.length} skills`}
-                                    sx={{ 
-                                      bgcolor: 'grey.100',
-                                      color: 'text.secondary',
-                                      fontWeight: 500
-                                    }}
-                                  />
-                                </Box>
-                              </Box>
-
-                              <Box display="flex" flexWrap="wrap" gap={2}>
-                                {category.skills.map((skill, skillIndex) => (
-                                  <EnhancedSkillChip
-                                    key={skillIndex}
-                                    label={skill.skillName}
-                                    proficiency={skill.proficiency}
-                                    skillcolor={getCategoryColor(category.name)}
-                                    onDelete={() => handleDeleteSkill(skill.skillName)}
-                                    deleteIcon={
-                                      <DeleteIcon 
+                        {categorizedSkills.map((category, categoryIndex) => {
+                          const isExpanded = expandedCategories[categoryIndex] || false;
+                          return (
+                            <SkillCategoryCard 
+                              key={categoryIndex}
+                              expanded={isExpanded}
+                            >
+                              <CardContent sx={{ p: 0 }}>
+                                {/* Category Header */}
+                                <Box 
+                                  display="flex" 
+                                  justifyContent="space-between" 
+                                  alignItems="center" 
+                                  sx={{ 
+                                    p: 3,
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      backgroundColor: 'rgba(79, 70, 229, 0.02)'
+                                    }
+                                  }}
+                                  onClick={() => toggleCategoryExpansion(categoryIndex)}
+                                >
+                                  <Box display="flex" alignItems="center" gap={2}>
+                                    <Box
+                                      sx={{
+                                        width: 16,
+                                        height: 16,
+                                        borderRadius: '50%',
+                                        bgcolor: getCategoryColor(category.name),
+                                        boxShadow: `0 2px 8px ${getCategoryColor(category.name)}40`
+                                      }}
+                                    />
+                                    <Typography 
+                                      variant="h6" 
+                                      sx={{ 
+                                        fontSize: '18px',
+                                        fontWeight: 600,
+                                        color: '#1e293b'
+                                      }}
+                                    >
+                                      {category.name}
+                                    </Typography>
+                                    <Chip 
+                                      size="small" 
+                                      label={`${category.skills.length} skills`}
+                                      sx={{ 
+                                        bgcolor: `${getCategoryColor(category.name)}20`,
+                                        color: getCategoryColor(category.name),
+                                        fontWeight: 600,
+                                        fontSize: '0.75rem'
+                                      }}
+                                    />
+                                    <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                      <Typography variant="caption" color="text.secondary">
+                                        Avg: {Math.round(calculateCategoryAverage(category.skills))}%
+                                      </Typography>
+                                      <LinearProgress 
+                                        variant="determinate" 
+                                        value={calculateCategoryAverage(category.skills)} 
                                         sx={{ 
-                                          fontSize: '18px',
-                                          transition: 'all 0.2s ease'
+                                          width: 60, 
+                                          height: 6, 
+                                          borderRadius: 3,
+                                          backgroundColor: 'rgba(0,0,0,0.1)',
+                                          '& .MuiLinearProgress-bar': {
+                                            backgroundColor: getCategoryColor(category.name),
+                                            borderRadius: 3
+                                          }
                                         }} 
                                       />
-                                    }
-                                  />
-                                ))}
-                              </Box>
-                            </CardContent>
-                          </AnimatedCard>
-                        ))}
+                                    </Box>
+                                  </Box>
+                                  <IconButton size="small" sx={{ color: 'text.secondary' }}>
+                                    {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                  </IconButton>
+                                </Box>
+
+                                {/* Category Skills - Collapsible */}
+                                <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                                  <Box sx={{ px: 3, pb: 3 }}>
+                                    <Grid container spacing={2}>
+                                      {category.skills.map((skill, skillIndex) => (
+                                        <Grid item xs={12} sm={6} md={4} key={skillIndex}>
+                                          <Box
+                                            sx={{
+                                              p: 2,
+                                              border: '1px solid #e2e8f0',
+                                              borderRadius: '12px',
+                                              backgroundColor: 'white',
+                                              transition: 'all 0.2s ease',
+                                              '&:hover': {
+                                                borderColor: getCategoryColor(category.name),
+                                                backgroundColor: `${getCategoryColor(category.name)}05`,
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: `0 4px 12px ${getCategoryColor(category.name)}20`
+                                              }
+                                            }}
+                                          >
+                                            <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                                              <Typography 
+                                                variant="subtitle2" 
+                                                sx={{ 
+                                                  fontWeight: 600,
+                                                  color: '#1e293b',
+                                                  flex: 1,
+                                                  mr: 1
+                                                }}
+                                              >
+                                                {skill.skillName}
+                                              </Typography>
+                                              <IconButton 
+                                                size="small"
+                                                onClick={() => handleDeleteSkill(skill.skillName)}
+                                                sx={{ 
+                                                  color: 'text.secondary',
+                                                  '&:hover': { color: 'error.main' }
+                                                }}
+                                              >
+                                                <DeleteIcon fontSize="small" />
+                                              </IconButton>
+                                            </Box>
+                                            
+                                            <Box display="flex" justifyContent="space-between" alignItems="center">
+                                              <Chip
+                                                size="small"
+                                                label={skill.proficiency}
+                                                sx={{
+                                                  backgroundColor: getProficiencyColor(skill.proficiency),
+                                                  color: 'white',
+                                                  fontWeight: 500,
+                                                  fontSize: '0.7rem'
+                                                }}
+                                              />
+                                              <Box sx={{ width: 60 }}>
+                                                <LinearProgress 
+                                                  variant="determinate" 
+                                                  value={getProficiencyPercentage(skill.proficiency)} 
+                                                  sx={{ 
+                                                    height: 4, 
+                                                    borderRadius: 2,
+                                                    backgroundColor: 'rgba(0,0,0,0.1)',
+                                                    '& .MuiLinearProgress-bar': {
+                                                      backgroundColor: getProficiencyColor(skill.proficiency),
+                                                      borderRadius: 2
+                                                    }
+                                                  }} 
+                                                />
+                                              </Box>
+                                            </Box>
+                                          </Box>
+                                        </Grid>
+                                      ))}
+                                    </Grid>
+                                  </Box>
+                                </Collapse>
+                              </CardContent>
+                            </SkillCategoryCard>
+                          );
+                        })}
                       </Box>
                     </Fade>
                   ) : (
@@ -3808,6 +3925,16 @@ const UserProfile = () => {
             )}
           </DialogActions>
         </Dialog>
+        
+         {/* Floating Action Button for Quick Access */}
+         <FloatingActionButton
+           component={Link}
+           to="/skill-gap-analysis"
+           aria-label="skill-gap-analysis"
+         >
+           <AnalyticsIcon sx={{ mr: 1 }} />
+           Skill Gap Analysis
+         </FloatingActionButton>
       </Box>
     </ThemeProvider>
   );

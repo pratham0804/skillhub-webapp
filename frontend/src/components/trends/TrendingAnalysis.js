@@ -47,6 +47,82 @@ const TrendingAnalysis = () => {
     danger: ['#fc466b', '#3f5efb', '#667eea', '#764ba2', '#f093fb', '#f5576c']
   };
 
+  // Skeleton Loading Components
+  const SkeletonChart = () => (
+    <div className="chart-container">
+      <div className="chart-header">
+        <div style={{ 
+          width: '60%', 
+          height: '24px', 
+          backgroundColor: '#e2e8f0', 
+          borderRadius: '6px',
+          marginBottom: '8px',
+          animation: 'pulse 1.5s ease-in-out infinite alternate'
+        }}></div>
+        <div style={{ 
+          width: '40%', 
+          height: '16px', 
+          backgroundColor: '#f1f5f9', 
+          borderRadius: '4px',
+          animation: 'pulse 1.5s ease-in-out infinite alternate'
+        }}></div>
+      </div>
+      <div style={{ 
+        width: '100%', 
+        height: '300px', 
+        backgroundColor: '#f8fafc', 
+        borderRadius: '12px',
+        marginTop: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: '1px solid #e2e8f0'
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '3px solid #e2e8f0',
+          borderTop: '3px solid #4f46e5',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
+      </div>
+    </div>
+  );
+
+  const SkeletonStats = () => (
+    <div className="trend-stats">
+      {[1, 2, 3, 4].map(i => (
+        <div key={i} className="stat-card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
+          <div style={{ 
+            width: '30px', 
+            height: '30px', 
+            backgroundColor: '#e2e8f0', 
+            borderRadius: '50%',
+            margin: '0 auto 12px',
+            animation: 'pulse 1.5s ease-in-out infinite alternate'
+          }}></div>
+          <div style={{ 
+            width: '60px', 
+            height: '32px', 
+            backgroundColor: '#e2e8f0', 
+            borderRadius: '6px',
+            margin: '0 auto 8px',
+            animation: 'pulse 1.5s ease-in-out infinite alternate'
+          }}></div>
+          <div style={{ 
+            width: '80px', 
+            height: '14px', 
+            backgroundColor: '#f1f5f9', 
+            borderRadius: '4px',
+            margin: '0 auto',
+            animation: 'pulse 1.5s ease-in-out infinite alternate'
+          }}></div>
+        </div>
+      ))}
+    </div>
+  );
+
   // Fetch trending data
   useEffect(() => {
     const fetchTrendingData = async () => {
@@ -292,9 +368,35 @@ const TrendingAnalysis = () => {
 
   if (loading) {
     return (
-      <div className="trending-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading trending analysis...</p>
+      <div className="enhanced-trending-container">
+        {/* Header with Loading Animation */}
+        <div className="trending-header-enhanced">
+          <div className="header-content">
+            <h1>Skills Trending Analysis</h1>
+            <p>Discovering the future of tech skills and market demands</p>
+          </div>
+          <SkeletonStats />
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="analysis-nav">
+          {['📊 Overview', '🎯 Skills Matrix', '🛠️ Tools & Tech', '🤖 AI Analysis'].map((tab, index) => (
+            <button key={index} className={`nav-tab ${index === 0 ? 'active' : ''}`} disabled>
+              <span className="tab-icon">{tab.split(' ')[0]}</span>
+              {tab.split(' ').slice(1).join(' ')}
+            </button>
+          ))}
+        </div>
+
+        {/* Content with Skeleton Charts */}
+        <div className="analysis-content">
+          <div className="charts-grid">
+            <SkeletonChart />
+            <SkeletonChart />
+            <SkeletonChart />
+            <SkeletonChart />
+          </div>
+        </div>
       </div>
     );
   }
