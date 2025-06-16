@@ -131,8 +131,29 @@ const extractSkillsFromResume = async (resumeText, targetRole = '') => {
     }
     `;
     
-    // Call Gemini API
-    const result = await model.generateContent(prompt);
+    // Call Gemini API with retry logic for overload errors
+    const callGeminiWithRetry = async (apiCall, maxRetries = 3, baseDelay = 1000) => {
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          return await apiCall();
+        } catch (error) {
+          const isOverloadError = error.message && (error.message.includes('503') || 
+                                 error.message.includes('overloaded') ||
+                                 error.message.includes('Service Unavailable'));
+          
+          if (isOverloadError && attempt < maxRetries) {
+            const delay = baseDelay * Math.pow(2, attempt - 1);
+            console.log(`🔄 Resume analysis: Gemini API overloaded, retrying in ${delay}ms (attempt ${attempt}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+          
+          throw error;
+        }
+      }
+    };
+
+    const result = await callGeminiWithRetry(() => model.generateContent(prompt));
     const responseText = result.response.text();
     
     try {

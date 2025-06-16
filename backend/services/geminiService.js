@@ -58,7 +58,7 @@ const enhanceSkillDescription = async (keywords, skillName, category) => {
     The description should be factual, clear, and helpful for someone learning about this skill.
     `;
     
-    const result = await model.generateContent(prompt);
+    const result = await callGeminiWithRetry(() => model.generateContent(prompt));
     const response = result.response;
     return response.text();
   } catch (error) {
@@ -85,12 +85,40 @@ const enhanceToolDescription = async (keywords, toolName, category) => {
     The description should be factual, clear, and helpful for someone learning about this tool.
     `;
     
-    const result = await model.generateContent(prompt);
+    const result = await callGeminiWithRetry(() => model.generateContent(prompt));
     const response = result.response;
     return response.text();
   } catch (error) {
     console.error('Gemini API error for tool description:', error);
     return keywords; // Fallback to original keywords if enhancement fails
+  }
+};
+
+/**
+ * Call Gemini API with retry logic for overload errors
+ * @param {function} apiCall - The API call function to retry
+ * @param {number} maxRetries - Maximum number of retries
+ * @param {number} baseDelay - Base delay in milliseconds
+ * @returns {Promise} - API response
+ */
+const callGeminiWithRetry = async (apiCall, maxRetries = 3, baseDelay = 1000) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await apiCall();
+    } catch (error) {
+      const isOverloadError = error.message && error.message.includes('503') || 
+                             error.message && error.message.includes('overloaded') ||
+                             error.message && error.message.includes('Service Unavailable');
+      
+      if (isOverloadError && attempt < maxRetries) {
+        const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
+        console.log(`🔄 Gemini API overloaded, retrying in ${delay}ms (attempt ${attempt}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      throw error; // Re-throw if not retryable or max retries reached
+    }
   }
 };
 
@@ -108,9 +136,9 @@ const generateRequiredSkillsForRole = async (targetRole) => {
     }
     
     // Generate a more detailed prompt with domain context for Gemini
-    const prompt = `Generate a detailed list of 8-12 key technical skills specifically required for a "${targetRole}" role in the tech industry.
+    const prompt = `Generate a comprehensive list of 12-16 key technical skills specifically required for a "${targetRole}" role in the tech industry.
 
-The skills should be directly relevant to this specific role and not generic skills that apply to all tech roles.
+The skills should be directly relevant to this specific role and not generic skills that apply to all tech roles. Include both core essential skills and additional skills that would make someone competitive in this role.
 
 For each skill, provide:
 1. Skill name (specific technology, language, framework, or technical concept)
@@ -118,10 +146,10 @@ For each skill, provide:
 3. Short description that explains why this skill matters for a ${targetRole} (max 100 characters)
 4. Estimated learning time in months
 
-For example, if the role is "Frontend Developer", include skills like React, JavaScript, CSS, etc.
-If the role is "Data Scientist", include skills like Python, SQL, Machine Learning, etc.
+For example, if the role is "Frontend Developer", include skills like React, JavaScript, CSS, TypeScript, Testing Libraries, Build Tools, etc.
+If the role is "Data Scientist", include skills like Python, SQL, Machine Learning, Statistics, Pandas, Jupyter, etc.
 
-Ensure all skills are specifically relevant to a ${targetRole} role based on current industry standards.
+Ensure all skills are specifically relevant to a ${targetRole} role based on current industry standards and job market demands.
 
 Format the response as a JSON array of objects with the following structure:
 [{
@@ -131,8 +159,8 @@ Format the response as a JSON array of objects with the following structure:
   "learningTimeMonths": number
 }]`;
 
-    // Call Gemini for analysis
-    const result = await model.generateContent(prompt);
+    // Call Gemini for analysis with retry logic
+    const result = await callGeminiWithRetry(() => model.generateContent(prompt));
     const responseText = result.response.text();
     
     // Parse the JSON response
@@ -197,6 +225,12 @@ const fallbackSkillsForRole = (targetRole) => {
         learningTimeMonths: 2
       },
       {
+        skillName: "TypeScript",
+        importance: "Important",
+        description: "Typed superset of JavaScript for better code quality",
+        learningTimeMonths: 1
+      },
+      {
         skillName: "Responsive Design",
         importance: "Essential",
         description: "Making web applications work on all screen sizes",
@@ -209,9 +243,9 @@ const fallbackSkillsForRole = (targetRole) => {
         learningTimeMonths: 1
       },
       {
-        skillName: "Version Control",
+        skillName: "Version Control (Git)",
         importance: "Important",
-        description: "Git for tracking code changes",
+        description: "Git for tracking code changes and collaboration",
         learningTimeMonths: 1
       },
       {
@@ -219,6 +253,36 @@ const fallbackSkillsForRole = (targetRole) => {
         importance: "Important",
         description: "Tools for debugging and testing web applications",
         learningTimeMonths: 1
+      },
+      {
+        skillName: "Testing Libraries",
+        importance: "Important", 
+        description: "Jest, React Testing Library for automated testing",
+        learningTimeMonths: 1
+      },
+      {
+        skillName: "Build Tools",
+        importance: "Helpful",
+        description: "Webpack, Vite, or Parcel for bundling applications",
+        learningTimeMonths: 1
+      },
+      {
+        skillName: "API Integration",
+        importance: "Important",
+        description: "Consuming REST APIs and handling HTTP requests",
+        learningTimeMonths: 1
+      },
+      {
+        skillName: "State Management",
+        importance: "Helpful",
+        description: "Redux, Zustand, or Context API for app state",
+        learningTimeMonths: 2
+      },
+      {
+        skillName: "Performance Optimization",
+        importance: "Helpful",
+        description: "Optimizing web applications for speed and efficiency",
+        learningTimeMonths: 2
       }
     ];
   } else if (normalizedRole.includes('back') || normalizedRole.includes('api')) {
@@ -498,9 +562,31 @@ const fallbackSkillsForRole = (targetRole) => {
   }
 };
 
+/**
+ * General Gemini API call function with retry logic
+ * @param {string} prompt - The prompt to send to Gemini
+ * @param {number} maxRetries - Maximum number of retries
+ * @returns {Promise<string>} - Response text from Gemini
+ */
+const callGeminiAPI = async (prompt, maxRetries = 3) => {
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('Gemini API key not configured');
+    }
+    
+    const result = await callGeminiWithRetry(() => model.generateContent(prompt), maxRetries);
+    return result.response.text();
+  } catch (error) {
+    console.error('Error calling Gemini API:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   model,
   enhanceSkillDescription,
   enhanceToolDescription,
-  generateRequiredSkillsForRole
+  generateRequiredSkillsForRole,
+  callGeminiAPI,
+  callGeminiWithRetry
 }; 

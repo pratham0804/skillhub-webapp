@@ -80,40 +80,69 @@ const getResourcesForSkill = async (req, res) => {
       // Use accurate skill search term for better results
       const normalizedSkill = skillName.trim();
       
-      // Fetch both YouTube and Coursera resources together
-      // Using the specific skill name as the search term
-      const resources = await youtubeService.searchYouTube(normalizedSkill);
+      // Fetch both YouTube and Coursera resources together using the enhanced method
+      console.log(`Using enhanced getRecommendationsForSkill for: ${normalizedSkill}`);
+      const resources = await youtubeService.getRecommendationsForSkill(normalizedSkill);
       
       if (!resources || resources.length === 0) {
-        // Create specific query for the skill
+        // Try fallback with more specific query
         const specificQuery = `${normalizedSkill} tutorial beginner learn`;
         console.log(`No resources found with basic query, trying specific query: "${specificQuery}"`);
         
-        // Try again with more specific search term
+        // Try again with YouTube search as fallback
         const fallbackResources = await youtubeService.searchYouTube(specificQuery);
         
         if (!fallbackResources || fallbackResources.length === 0) {
-          // No resources found, return a 404 instead of default resources
-          return res.status(404).json({
-            success: false,
-            message: `No learning resources found for ${skillName}`
+          // Return empty result instead of error to allow frontend to handle gracefully
+          return res.status(200).json({
+            success: true,
+            message: `No learning resources found for ${skillName}`,
+            data: [],
+            groupedData: {
+              youtube: [],
+              coursera: [],
+              documentation: []
+            }
           });
         }
         
         // Label resources by source and return them
+        const labeledResources = youtubeService.labelResourcesBySource(fallbackResources);
+        const groupedFallback = {
+          youtube: labeledResources.filter(r => r.source === 'YouTube' || r.source === 'youtube' || (!r.source && !r.type)),
+          coursera: labeledResources.filter(r => r.source === 'Coursera' || r.source === 'coursera'),
+          documentation: labeledResources.filter(r => r.source === 'Documentation' || r.source === 'documentation' || r.type === 'documentation')
+        };
+        
         return res.status(200).json({
           success: true,
           message: `Found resources for ${skillName} with specific query`,
-          data: youtubeService.labelResourcesBySource(fallbackResources)
+          data: labeledResources,
+          groupedData: groupedFallback
         });
       }
       
       // Group resources by source
       const groupedResources = {
-        youtube: resources.filter(r => r.source === 'YouTube' || (!r.source && !r.type)),
-        coursera: resources.filter(r => r.source === 'Coursera'),
-        documentation: resources.filter(r => r.source === 'Documentation' || r.type === 'documentation')
+        youtube: resources.filter(r => 
+          r.source === 'YouTube' || 
+          r.source === 'youtube' || 
+          (r.url && r.url.includes('youtube.com')) ||
+          (!r.source && !r.type)
+        ),
+        coursera: resources.filter(r => 
+          r.source === 'Coursera' || 
+          r.source === 'coursera' ||
+          (r.url && r.url.includes('coursera.org'))
+        ),
+        documentation: resources.filter(r => 
+          r.source === 'Documentation' || 
+          r.source === 'documentation' || 
+          r.type === 'documentation'
+        )
       };
+      
+      console.log(`Found ${resources.length} total resources: ${groupedResources.youtube.length} YouTube, ${groupedResources.coursera.length} Coursera, ${groupedResources.documentation.length} Documentation`);
       
       return res.status(200).json({
         success: true,
@@ -124,11 +153,17 @@ const getResourcesForSkill = async (req, res) => {
     } catch (error) {
       console.error(`Error fetching resources for skill ${skillName}:`, error);
       
-      // Return an error instead of default resources
+      // Return an error with empty data structure
       return res.status(500).json({
         success: false,
         message: `Failed to fetch resources for ${skillName}`,
-        error: error.message
+        error: error.message,
+        data: [],
+        groupedData: {
+          youtube: [],
+          coursera: [],
+          documentation: []
+        }
       });
     }
   } catch (error) {

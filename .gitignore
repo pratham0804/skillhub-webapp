@@ -182,4 +182,23 @@ private-key.json
 service-account.json
 
 # API Keys file
-api-keys.json 
+api-keys.json
+
+# ===== RESUME FEATURE - DO NOT COMMIT =====
+# Resume page only (keeping resume upload feature in profile)
+frontend/src/pages/ResumePage.js
+frontend/src/pages/ResumePage.css
+
+# Resume uploads and temp files
+backend/uploads/
+backend/temp/
+
+# Temporary development files
+temp-profile-repo/
+*.pdf
+*.doc
+*.docx
+
+# Resume analysis and AI features
+**/ResumeAnalysis*
+**/resume-analysis* 

@@ -437,32 +437,6 @@ const TrendingAnalysis = () => {
 
   const renderOverviewSection = () => (
     <div>
-      {/* Trend Statistics */}
-      <div className="trend-stats">
-        <div className="stat-card">
-          <span className="stat-icon">📈</span>
-          <span className="stat-number">{getTotalSkills()}</span>
-          <span className="stat-label">Total Skills</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-icon">🛠️</span>
-          <span className="stat-number">{getTotalTools()}</span>
-          <span className="stat-label">Tools Tracked</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-icon">🚀</span>
-          <span className="stat-number">{getTopGrowthRate()}</span>
-          <span className="stat-label">Top Growth</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-icon">💰</span>
-          <span className="stat-number">
-            {trendingSkills?.topSalarySkills?.[0]?.averageSalary || 'N/A'}
-          </span>
-          <span className="stat-label">Top Salary</span>
-        </div>
-      </div>
-
       {/* Charts Grid */}
       <div className="charts-grid">
         {demandChartData && (
@@ -619,6 +593,32 @@ const TrendingAnalysis = () => {
         <div className="header-content">
           <h1>Market Trends Dashboard</h1>
           <p>Real-time insights into skill demand and technology trends</p>
+        </div>
+        
+        {/* Trend Statistics */}
+        <div className="trend-stats">
+          <div className="stat-card">
+            <span className="stat-icon">📈</span>
+            <span className="stat-number">{getTotalSkills()}</span>
+            <span className="stat-label">Total Skills</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon">🛠️</span>
+            <span className="stat-number">{getTotalTools()}</span>
+            <span className="stat-label">Tools Tracked</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon">🚀</span>
+            <span className="stat-number">{getTopGrowthRate()}</span>
+            <span className="stat-label">Top Growth</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon">💰</span>
+            <span className="stat-number">
+              {trendingSkills?.topSalarySkills?.[0]?.averageSalary || 'N/A'}
+            </span>
+            <span className="stat-label">Top Salary</span>
+          </div>
         </div>
       </div>
 

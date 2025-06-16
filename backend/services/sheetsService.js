@@ -32,11 +32,13 @@ const getCredentials = () => {
       };
     }
     
-    throw new Error('No valid Google credentials found for Sheets service');
+    // If no credentials found, log warning but don't throw error
+    console.warn('⚠️ Google Sheets credentials not found. Using fallback data instead.');
+    return null;
     
   } catch (error) {
     console.error('Error getting credentials:', error);
-    throw error;
+    return null;
   }
 };
 
@@ -51,6 +53,12 @@ const getSkillsData = async () => {
   try {
     // Get credentials dynamically
     const credentials = getCredentials();
+    
+    // If no credentials, return empty array to trigger fallback
+    if (!credentials) {
+      console.log('No Google Sheets credentials available, using fallback data');
+      return [];
+    }
     
     // Initialize the sheet - doc ID is the long id in the sheets URL
     const doc = new GoogleSpreadsheet(process.env.SKILL_SHEET_ID);
@@ -100,7 +108,8 @@ const getSkillsData = async () => {
     return skills;
   } catch (error) {
     console.error('Error fetching skills data:', error);
-    throw error;
+    console.log('Returning empty array to trigger fallback data');
+    return [];
   }
 };
 
@@ -115,6 +124,12 @@ const getToolsData = async () => {
   try {
     // Get credentials dynamically
     const credentials = getCredentials();
+    
+    // If no credentials, return empty array to trigger fallback
+    if (!credentials) {
+      console.log('No Google Sheets credentials available, using fallback data');
+      return [];
+    }
     
     // Initialize the sheet - doc ID is the long id in the sheets URL
     const doc = new GoogleSpreadsheet(process.env.TOOL_SHEET_ID);
@@ -164,7 +179,8 @@ const getToolsData = async () => {
     return tools;
   } catch (error) {
     console.error('Error fetching tools data:', error);
-    throw error;
+    console.log('Returning empty array to trigger fallback data');
+    return [];
   }
 };
 

@@ -911,6 +911,7 @@ const getRecommendationsForSkill = async (skillName) => {
     // Add Coursera courses to recommendations
     try {
       const courseraResults = await courseraService.getCoursesForSkill(skillName);
+      
       if (courseraResults && courseraResults.length > 0) {
         // Apply relevance filtering to Coursera results
         const relevantCourseraResults = courseraResults.filter(resource => {
@@ -927,7 +928,7 @@ const getRecommendationsForSkill = async (skillName) => {
           recommendations = recommendations.concat(relevantCourseraResults);
         }
       }
-    } catch (courseraError) {
+          } catch (courseraError) {
       console.error('Error fetching Coursera recommendations:', courseraError);
       // Continue with what we have
     }

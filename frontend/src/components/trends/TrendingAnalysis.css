@@ -18,7 +18,7 @@
   margin-bottom: 2rem;
   color: white;
   box-shadow: 0 20px 40px rgba(79, 70, 229, 0.2);
-  position: relative;
+  position: static;
   overflow: hidden;
 }
 
@@ -87,9 +87,7 @@
 }
 
 .stat-card:hover {
-  transform: translateY(-6px) scale(1.02);
   background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
 }
 
 .stat-icon {
@@ -129,6 +127,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   overflow-x: auto;
   border: 1px solid #e5e7eb;
+  position: static;
 }
 
 .nav-tab {
@@ -152,14 +151,12 @@
 .nav-tab:hover {
   background: #f1f5f9;
   color: #334155;
-  transform: translateY(-1px);
 }
 
 .nav-tab.active {
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   color: white;
   box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
-  transform: translateY(-2px);
 }
 
 .tab-icon {
@@ -194,8 +191,6 @@
 }
 
 .chart-container:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-  transform: translateY(-4px);
   border-color: #cbd5e1;
 }
 
@@ -288,8 +283,6 @@
 }
 
 .skill-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   border-color: #c7d2fe;
 }
 
@@ -422,8 +415,6 @@
 }
 
 .tool-importance-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   border-color: #c7d2fe;
 }
 
@@ -854,6 +845,21 @@
   .indicator-card {
     padding: 1.2rem;
   }
+  
+  /* Remove all hover effects on touch devices */
+  @media (hover: none) {
+    .stat-card:hover,
+    .nav-tab:hover,
+    .chart-container:hover,
+    .skill-card:hover,
+    .tool-importance-card:hover,
+    .indicator-card:hover {
+      transform: none;
+      background: inherit;
+      border-color: inherit;
+      box-shadow: inherit;
+    }
+  }
 }
 
 @media (max-width: 480px) {
@@ -936,7 +942,6 @@
 }
 
 .retry-button:hover {
-  transform: translateY(-1px);
   box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
 }
 

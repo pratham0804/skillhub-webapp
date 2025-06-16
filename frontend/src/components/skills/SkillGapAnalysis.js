@@ -1,9 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import SkillResources from './SkillResources';
 import './SkillGapAnalysis.css';
 import CareerGuidanceView from '../career/CareerGuidanceView';
+
+// Resource Modal Component
+const ResourceModal = ({ isOpen, skillName, onClose }) => {
+  if (!isOpen || !skillName) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>Learning Resources for {skillName}</h3>
+          <button onClick={onClose} className="modal-close-btn">×</button>
+        </div>
+        <div className="modal-body">
+          <SkillResources 
+            skillName={skillName} 
+            isVisible={true}
+            onToggle={onClose}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SkillGapAnalysis = () => {
   const { api, currentUser } = useAuth();
@@ -13,90 +35,99 @@ const SkillGapAnalysis = () => {
   const [targetRole, setTargetRole] = useState('');
   const [userSkills, setUserSkills] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [learningResources, setLearningResources] = useState([]);
-  const [resourcesLoading, setResourcesLoading] = useState(false);
-  const [selectedSkill, setSelectedSkill] = useState(null);
   const [recommendedSkills, setRecommendedSkills] = useState([]);
-  const [careerAnalysis, setCareerAnalysis] = useState(null);
-  const [missingSkills, setMissingSkills] = useState([]);
-  const [matchingSkills, setMatchingSkills] = useState([]);
-  const [recommendation, setRecommendation] = useState('');
+  const [careerAnalysis] = useState(null);
+  
+  // New state for UI enhancements
+  const [showAllSkills, setShowAllSkills] = useState(false);
+  const [skillsPerPage] = useState(6);
+  const [resourceModalOpen, setResourceModalOpen] = useState(false);
+  const [selectedSkillForModal, setSelectedSkillForModal] = useState(null);
   
   // Check authentication on mount and when currentUser changes
   useEffect(() => {
     setIsAuthenticated(currentUser !== null);
   }, [currentUser]);
   
-  // Fetch user profile when authenticated
-  useEffect(() => {
-    let mounted = true;
-    
-    const fetchUserProfile = async () => {
-      // Don't attempt to fetch if not authenticated
-      if (!isAuthenticated) {
-        return;
-      }
+  // Refresh user profile data
+  const refreshUserProfile = async () => {
+    if (!isAuthenticated) return;
       
       try {
         setLoading(true);
         const response = await api.get('/users/profile');
-        
-        if (response.data.status === 'success' && mounted) {
-          const { targetRole, existingSkills } = response.data.data.user;
-          setTargetRole(targetRole || '');
-          setUserSkills(existingSkills || []);
-          setError(null);
-          
-          // Fetch learning resources if target role exists
-          if (targetRole) {
-            fetchLearningResources(targetRole);
-          }
+      if (response.data.status === 'success') {
+        const userData = response.data.data.user;
+        setUserSkills(userData.existingSkills || []);
+        setTargetRole(userData.targetRole || '');
+        console.log('✅ Refreshed user profile:', {
+          skillsCount: userData.existingSkills?.length || 0,
+          targetRole: userData.targetRole
+        });
         }
       } catch (error) {
-        console.error('Error fetching profile:', error);
-        if (error.response && error.response.status === 401 && mounted) {
-          setIsAuthenticated(false);
-          setError('Your session has expired. Please log in again.');
-          localStorage.removeItem('token');
-        } else if (mounted) {
-          setError('Failed to load your profile. Please try again.');
-        }
+      console.error('Error refreshing profile:', error);
+      setError('Failed to refresh profile data');
       } finally {
-        if (mounted) {
           setLoading(false);
-        }
-      }
-    };
-    
-    fetchUserProfile();
-    return () => { mounted = false; };
-  }, [api, isAuthenticated]);
-  
-  // Fetch learning resources for a given target role
-  const fetchLearningResources = async (role) => {
+    }
+  };
+
+  // Fetch recommended skills for the target role
+  const fetchRecommendedSkills = useCallback(async (role = targetRole) => {
     if (!role) return;
     
     try {
-      setResourcesLoading(true);
-      const response = await api.get(`/learning/role/${encodeURIComponent(role)}`);
+      setLoading(true);
+      setError(null);
+      
+      console.log(`Fetching recommended skills for role: ${role}`);
+      
+      // Use the enhanced API endpoint that asks Gemini for more skills
+      const response = await api.get(`/users/public/required-skills/${encodeURIComponent(role)}`);
       
       if (response.data.status === 'success') {
-        setLearningResources(response.data.data.resources);
+        const skills = response.data.data.skills || [];
+        console.log(`Received ${skills.length} recommended skills:`, skills);
+        setRecommendedSkills(skills);
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch recommended skills');
       }
     } catch (error) {
-      console.error('Error fetching learning resources:', error);
-      // Don't show an error to the user - just log it
+      console.error('Error fetching recommended skills:', error);
+      setError(`Failed to load recommended skills: ${error.response?.data?.message || error.message}`);
+      setRecommendedSkills([]);
     } finally {
-      setResourcesLoading(false);
+      setLoading(false);
     }
-  };
-  
-  // Update target role
+  }, [api, targetRole]);
+
+  // Load user data when authenticated
+  useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      console.log('🔍 Loading user data:', {
+        targetRole: currentUser.targetRole,
+        existingSkillsCount: currentUser.existingSkills?.length || 0,
+        existingSkills: currentUser.existingSkills
+      });
+      
+      setTargetRole(currentUser.targetRole || '');
+      setUserSkills(currentUser.existingSkills || []);
+      
+      // If user has a target role, fetch recommended skills
+      if (currentUser.targetRole) {
+        fetchRecommendedSkills(currentUser.targetRole);
+      }
+    } else {
+      console.log('❌ User not authenticated or no current user');
+    }
+  }, [isAuthenticated, currentUser, fetchRecommendedSkills]);
+
+  // Handle target role form submission
   const handleTargetRoleChange = async (e) => {
     e.preventDefault();
-    
-    if (!isAuthenticated) {
-      setError('Please log in to update your target role.');
+    if (!targetRole.trim()) {
+      setError('Please enter a target role');
       return;
     }
     
@@ -104,34 +135,78 @@ const SkillGapAnalysis = () => {
       setLoading(true);
       setError(null);
       
-      // Clear previous recommended skills when updating target role
-      setRecommendedSkills([]);
-      
+      // Update user's target role in database
       const response = await api.put('/users/profile', {
-        targetRole
+        targetRole: targetRole.trim()
       });
       
       if (response.data.status === 'success') {
-        // Show success message
-        alert('Target role updated successfully!');
-        
-        // Fetch learning resources for the new target role
-        fetchLearningResources(targetRole);
-        
-        // Fetch recommended skills (this will happen automatically via useEffect)
+        // Fetch recommended skills for the new role
+        await fetchRecommendedSkills(targetRole.trim());
       }
     } catch (error) {
       console.error('Error updating target role:', error);
-      if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError('Your session has expired. Please log in again.');
-        localStorage.removeItem('token');
-      } else {
-        setError('Failed to update target role. Please try again.');
-      }
+      setError('Failed to update target role');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Add skill to user's skill list
+  const handleAddSkill = async (skillName) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const skillData = {
+        skillName,
+        proficiency: 'Beginner',
+        category: 'Technical',
+        status: 'Not Started'
+      };
+      
+      console.log('Adding skill:', skillData);
+      const response = await api.patch('/users/skills', skillData);
+      
+      if (response.data.status === 'success') {
+        // Update local user skills
+        setUserSkills(prev => [...prev, skillData]);
+        
+        // Show success message
+        console.log(`✅ Successfully added skill: ${skillName}`);
+        
+        // Also refetch user profile to ensure consistency
+        if (currentUser) {
+          try {
+            const profileResponse = await api.get('/users/profile');
+            if (profileResponse.data.status === 'success') {
+              setUserSkills(profileResponse.data.data.user.existingSkills || []);
+            }
+          } catch (profileError) {
+            console.error('Error refreshing profile:', profileError);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error adding skill:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Unknown error';
+      setError(`Failed to add skill "${skillName}": ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle showing skill resources in modal
+  const handleShowSkillResources = (skillName) => {
+    console.log(`Opening resource modal for skill: ${skillName}`);
+    setSelectedSkillForModal(skillName);
+    setResourceModalOpen(true);
+  };
+
+  // Close resource modal
+  const closeResourceModal = () => {
+    setResourceModalOpen(false);
+    setSelectedSkillForModal(null);
   };
   
   // Run analysis
@@ -174,205 +249,28 @@ const SkillGapAnalysis = () => {
             enhancedAnalysis: data.enhancedAnalysis || ''
           };
           setAnalysis(processedAnalysis);
-          console.log('Analysis data:', processedAnalysis); // Debug log
+          console.log('Analysis data:', processedAnalysis);
         }
       }
     } catch (error) {
-      console.error('Error running analysis:', error);
-      if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError('Your session has expired. Please log in again.');
-        localStorage.removeItem('token');
-      } else {
+      console.error('Analysis error:', error);
         setError(error.response?.data?.message || 'Failed to run analysis. Please try again.');
-      }
     } finally {
       setLoading(false);
     }
   };
   
-  // Add skill to profile
-  const handleAddSkill = async (skillName) => {
-    if (!isAuthenticated) {
-      setError('Please log in to add skills to your profile.');
-      return;
+  // Get the skills to display (with pagination)
+  const getDisplayedSkills = () => {
+    if (showAllSkills) {
+      return userSkills;
     }
-    
-    try {
-      // Case insensitive check if skill already exists in user profile
-      const skillExists = userSkills.some(skill => 
-        skill.skillName.toLowerCase() === skillName.toLowerCase()
-      );
-      
-      if (skillExists) {
-        alert(`You already have "${skillName}" in your profile!`);
-        return;
-      }
-      
-      setLoading(true); // Show loading state
-      console.log(`Adding skill: ${skillName}`); // Debug
-      
-      const response = await api.patch('/users/skills', {
-        skillName,
-        proficiency: 'Beginner',
-        status: 'Not Started'
-      });
-      
-      if (response.data.status === 'success') {
-        // Refresh user skills
-        const profileResponse = await api.get('/users/profile');
-        setUserSkills(profileResponse.data.data.user.existingSkills);
-        alert(`Skill "${skillName}" added to your profile!`);
-      }
-    } catch (error) {
-      console.error('Error adding skill:', error);
-      // Show detailed error information
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
-        console.error('Response headers:', error.response.headers);
-        alert(`Failed to add skill: ${error.response.data.message || 'Server error'}`);
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error('Request made but no response received:', error.request);
-        alert('Network error - no response from server. Please check your connection.');
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error('Error setting up request:', error.message);
-        alert(`Error: ${error.message}`);
-      }
-      
-      if (error.response && error.response.status === 401) {
-        setIsAuthenticated(false);
-        setError('Your session has expired. Please log in again.');
-        localStorage.removeItem('token');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Handle opening a resource in a new tab
-  const handleOpenResource = (url) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
-  
-  // Handle showing resources for a specific skill
-  const handleShowSkillResources = (skillName) => {
-    setSelectedSkill(skillName === selectedSkill ? null : skillName);
-  };
-  
-  // Fetch recommended skills when target role changes
-  useEffect(() => {
-    if (targetRole) {
-      fetchRecommendedSkills();
-    } else {
-      setRecommendedSkills([]);
-    }
-  }, [targetRole]);
-  
-  // Add a function to fetch recommended skills
-  const fetchRecommendedSkills = async () => {
-    if (!targetRole) {
-      setRecommendedSkills([]);
-      return;
-    }
-    
-    try {
-      setResourcesLoading(true);
-      setError(null);
-      
-      console.log(`Fetching recommended skills for: ${targetRole}`);
-      const response = await api.get(`/users/public/required-skills/${encodeURIComponent(targetRole)}`);
-      
-      if (response.data.status === 'success') {
-        const skills = response.data.data.skills || [];
-        console.log(`Received ${skills.length} recommended skills for ${targetRole}`);
-        setRecommendedSkills(skills);
-      } else {
-        setRecommendedSkills([]);
-        setError('Failed to fetch recommended skills.');
-      }
-    } catch (error) {
-      console.error('Error fetching recommended skills:', error);
-      setRecommendedSkills([]);
-      setError('Failed to fetch recommended skills. Please try again.');
-    } finally {
-      setResourcesLoading(false);
-    }
-  };
-  
-  useEffect(() => {
-    if (isAuthenticated && currentUser?.targetRole) {
-      setTargetRole(currentUser.targetRole);
-      fetchSkillGapAnalysis();
-    }
-  }, [isAuthenticated, currentUser, api]);
-
-  // Fetch skill gap analysis
-  const fetchSkillGapAnalysis = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await api.get('/users/analysis/skill-gap');
-      
-      if (response.data.status === 'success') {
-        const { missingSkills, matchingSkills, recommendation } = response.data.data;
-        setMissingSkills(missingSkills || []);
-        setMatchingSkills(matchingSkills || []);
-        setRecommendation(recommendation || '');
-        
-        // Check for and set career analysis data if available
-        if (response.data.data.careerGuidance) {
-          setCareerAnalysis(response.data.data.careerGuidance);
-        } else {
-          // If no career guidance is available in the API response, fetch it separately
-          fetchCareerGuidance();
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching skill gap analysis:', error);
-      setError('Failed to fetch skill gap analysis');
-    } finally {
-      setLoading(false);
-    }
+    return userSkills.slice(0, skillsPerPage);
   };
 
-  // Fetch career guidance if not included in skill gap analysis
-  const fetchCareerGuidance = async () => {
-    try {
-      const response = await api.get(`/users/career-guidance/${encodeURIComponent(currentUser.targetRole)}`);
-      
-      if (response.data.status === 'success') {
-        setCareerAnalysis(response.data.data.careerGuidance);
-      }
-    } catch (error) {
-      console.error('Error fetching career guidance:', error);
-      // Don't show error for this as it's a supplementary feature
-      // Just create a placeholder career guidance
-      createPlaceholderCareerGuidance();
-    }
-  };
-  
-  // Create a placeholder career guidance for demo/testing
-  const createPlaceholderCareerGuidance = () => {
-    if (!currentUser?.targetRole) return;
-    
-    setCareerAnalysis({
-      targetRole: currentUser.targetRole,
-      skillAssessment: "Based on your current skills profile, we've identified areas to focus on for your career path.",
-      learningPath: [
-        "Strengthen core skills relevant to your target role",
-        "Develop specialized knowledge in key areas",
-        "Build practical experience through projects",
-        "Focus on professional development"
-      ],
-      timeline: "Approximately 6-12 months of focused learning"
-    });
-  };
+
+
+  // Note: fetchCareerGuidance and createPlaceholderCareerGuidance functions removed as they were unused
   
   // Display a login message if not authenticated
   if (!isAuthenticated) {
@@ -412,8 +310,8 @@ const SkillGapAnalysis = () => {
         </form>
       </div>
       
-      {/* Required Skills for Role Section - Add before Learning Resources */}
-      {recommendedSkills && recommendedSkills.length > 0 && (
+      {/* Required Skills for Role Section */}
+      {recommendedSkills.length > 0 && (
         <div className="required-skills-overview">
           <h3>Skills Required for {targetRole}</h3>
           <p className="section-description">
@@ -428,9 +326,10 @@ const SkillGapAnalysis = () => {
             </span>
           </p>
           
-          <div className="skill-cards-container">
+          {/* Two-column grid for suggested skills */}
+          <div className="suggested-skills-grid">
             {recommendedSkills.map((skill, index) => (
-              <div key={index} className={`skill-card ${skill.importance?.toLowerCase() || ''}`}>
+              <div key={index} className={`skill-card-half ${skill.importance?.toLowerCase() || ''}`}>
                 <div className="skill-header">
                   <h4>{skill.skillName}</h4>
                   {skill.importance && (
@@ -446,6 +345,7 @@ const SkillGapAnalysis = () => {
                     <span>~{skill.learningTimeMonths} {skill.learningTimeMonths === 1 ? 'month' : 'months'} to learn</span>
                   </div>
                 )}
+                
                 <div className="skill-actions">
                   <button 
                     onClick={() => handleAddSkill(skill.skillName)}
@@ -457,59 +357,32 @@ const SkillGapAnalysis = () => {
                     onClick={() => handleShowSkillResources(skill.skillName)}
                     className="secondary-button"
                   >
-                    Resources
+                    📚 Resources
                   </button>
                 </div>
-                {selectedSkill === skill.skillName && (
-                  <div className="resource-container">
-                    {SkillResources && typeof SkillResources === 'function' ? 
-                      <SkillResources skillName={skill.skillName} /> : 
-                      <p>Loading resources...</p>
-                    }
-                  </div>
-                )}
               </div>
             ))}
           </div>
         </div>
       )}
       
-      {/* Learning Resources Section */}
-      {learningResources.length > 0 && (
-        <div className="learning-resources-section">
-          <h3>Recommended Learning Resources</h3>
-          <p>Here are some recommended courses and tutorials to help you become a {targetRole}:</p>
-          
-          <div className="resources-grid">
-            {learningResources.map((resource, index) => (
-              <div key={index} className="resource-card" onClick={() => handleOpenResource(resource.url)}>
-                <div className="resource-thumbnail">
-                  <img src={resource.thumbnail} alt={resource.title} />
-                </div>
-                <div className="resource-info">
-                  <h4 className="resource-title">{resource.title}</h4>
-                  <p className="resource-author">by {resource.author}</p>
-                  <p className="resource-description">{resource.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {resourcesLoading && (
-        <div className="resources-loading">
-          <div className="loading-spinner"></div>
-          <p>Loading recommended courses...</p>
-        </div>
-      )}
-      
-      {/* Your Skills Section */}
+      {/* Your Skills Section with Pagination */}
       <div className="your-skills-section">
+        <div className="skills-header">
         <h3>Your Skills</h3>
+          <button 
+            onClick={refreshUserProfile}
+            disabled={loading}
+            className="refresh-btn"
+            title="Refresh skills data"
+          >
+            {loading ? '⟳' : '🔄'} Refresh
+          </button>
+        </div>
         {userSkills.length > 0 ? (
+          <>
           <ul className="skills-list">
-            {userSkills.map((skill, index) => (
+              {getDisplayedSkills().map((skill, index) => (
               <li key={index} className="skill-item">
                 <div className="skill-name">{skill.skillName}</div>
                 <div className="skill-proficiency">
@@ -522,9 +395,30 @@ const SkillGapAnalysis = () => {
                     {skill.status}
                   </span>
                 </div>
+                  <div className="skill-actions">
+                    <button 
+                      onClick={() => handleShowSkillResources(skill.skillName)}
+                      className="resources-btn"
+                    >
+                      📚 Resources
+                    </button>
+                  </div>
               </li>
             ))}
           </ul>
+            
+            {/* Pagination Controls */}
+            {userSkills.length > skillsPerPage && (
+              <div className="skills-pagination">
+                <button 
+                  onClick={() => setShowAllSkills(!showAllSkills)}
+                  className="skills-pagination-button"
+                >
+                  {showAllSkills ? 'Show Less' : `Show More (${userSkills.length - skillsPerPage} more)`}
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="no-skills-yet">
             <p>No skills added yet. {targetRole ? `Here are recommended skills for ${targetRole}:` : 'Set your target role to see recommended skills.'}</p>
@@ -539,12 +433,12 @@ const SkillGapAnalysis = () => {
                 ) : error ? (
                   <div className="error-message">
                     <p>{error}</p>
-                    <button onClick={fetchRecommendedSkills} className="retry-btn">
+                    <button onClick={() => fetchRecommendedSkills()} className="retry-btn">
                       Retry
                     </button>
                   </div>
-                ) : recommendedSkills && recommendedSkills.length > 0 ? (
-                  <div className="skills-grid">
+                ) : recommendedSkills.length > 0 ? (
+                  <div className="suggested-skills-grid">
                     {recommendedSkills.map((skill, index) => {
                       // Case insensitive check if this skill is already in the user's profile
                       const alreadyHasSkill = userSkills.some(
@@ -552,7 +446,7 @@ const SkillGapAnalysis = () => {
                       );
                       
                       return (
-                        <div key={index} className={`skill-card ${skill.importance?.toLowerCase() || ''}`}>
+                        <div key={index} className={`skill-card-half ${skill.importance?.toLowerCase() || ''}`}>
                           <div className="skill-header">
                             <h5>{skill.skillName}</h5>
                             {skill.importance && (
@@ -568,6 +462,7 @@ const SkillGapAnalysis = () => {
                               <span>~{skill.learningTimeMonths} {skill.learningTimeMonths === 1 ? 'month' : 'months'} to learn</span>
                             </div>
                           )}
+                          
                           <div className="skill-actions">
                             {!alreadyHasSkill ? (
                               <>
@@ -612,7 +507,6 @@ const SkillGapAnalysis = () => {
         )}
       </div>
       
-      {/* Analysis Results Section - Error handling improvement */}
       {error && (
         <div className="error-message-card">
           <div className="error-icon">❌</div>
@@ -626,6 +520,7 @@ const SkillGapAnalysis = () => {
         </div>
       )}
 
+      {/* Call to Action for Analysis */}
       {!analysis && (
         <div className="analysis-cta">
           <div className="cta-content">
@@ -652,6 +547,7 @@ const SkillGapAnalysis = () => {
         </div>
       )}
 
+      {/* Analysis Results */}
       {analysis && (
         <div className="analysis-results">
           <h3>Skill Gap Analysis Results for {analysis.targetRole}</h3>
@@ -664,7 +560,7 @@ const SkillGapAnalysis = () => {
             {analysis.missingSkills.length === 0 ? (
               <p>No critical missing skills identified - great job!</p>
             ) : (
-              <div className="skills-grid">
+              <div className="suggested-skills-grid">
                 {analysis.missingSkills.map((skill, index) => {
                   // Case insensitive check if this skill is already in the user's profile
                   const alreadyHasSkill = userSkills.some(
@@ -672,7 +568,7 @@ const SkillGapAnalysis = () => {
                   );
                   
                   return (
-                    <div key={index} className={`skill-card ${skill.importance?.toLowerCase() || ''}`}>
+                    <div key={index} className={`skill-card-half ${skill.importance?.toLowerCase() || ''}`}>
                       <div className="skill-header">
                         <h5>{skill.skillName}</h5>
                         {skill.importance && (
@@ -688,6 +584,7 @@ const SkillGapAnalysis = () => {
                           <span>~{skill.learningTimeMonths} {skill.learningTimeMonths === 1 ? 'month' : 'months'} to learn</span>
                         </div>
                       )}
+                      
                       <div className="skill-actions">
                         {!alreadyHasSkill ? (
                           <>
@@ -717,14 +614,6 @@ const SkillGapAnalysis = () => {
                           </div>
                         )}
                       </div>
-                      {selectedSkill === skill.skillName && (
-                        <div className="resource-container">
-                          {SkillResources && typeof SkillResources === 'function' ? 
-                            <SkillResources skillName={skill.skillName} /> : 
-                            <p>Loading resources...</p>
-                          }
-                        </div>
-                      )}
                     </div>
                   );
                 })}
@@ -740,13 +629,13 @@ const SkillGapAnalysis = () => {
             {analysis.skillsToImprove.length === 0 ? (
               <p>No skills identified for improvement.</p>
             ) : (
-              <div className="skills-grid">
+              <div className="suggested-skills-grid">
                 {analysis.skillsToImprove.map((skill, index) => {
                   const userSkill = analysis.userSkills.find(
                     us => us.skillName.toLowerCase() === skill.skillName.toLowerCase()
                   );
                   return (
-                    <div key={index} className={`skill-card improvement ${skill.importance?.toLowerCase() || ''}`}>
+                    <div key={index} className={`skill-card-half improvement ${skill.importance?.toLowerCase() || ''}`}>
                       <div className="skill-header">
                         <h5>{skill.skillName}</h5>
                         {skill.importance && (
@@ -766,6 +655,7 @@ const SkillGapAnalysis = () => {
                           <span className="level-value">Advanced</span>
                         </div>
                       </div>
+                      
                       <div className="skill-actions">
                         <button 
                           onClick={() => handleShowSkillResources(skill.skillName)}
@@ -774,14 +664,6 @@ const SkillGapAnalysis = () => {
                           📚 Learning Resources
                         </button>
                       </div>
-                      {selectedSkill === skill.skillName && (
-                        <div className="resource-container">
-                          {SkillResources && typeof SkillResources === 'function' ? 
-                            <SkillResources skillName={skill.skillName} /> : 
-                            <p>Loading resources...</p>
-                          }
-                        </div>
-                      )}
                     </div>
                   );
                 })}
@@ -827,6 +709,13 @@ const SkillGapAnalysis = () => {
           />
         </div>
       )}
+
+      {/* Resource Modal */}
+      <ResourceModal 
+        isOpen={resourceModalOpen}
+        skillName={selectedSkillForModal}
+        onClose={closeResourceModal}
+      />
     </div>
   );
 };

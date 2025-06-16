@@ -308,115 +308,91 @@ const ContributionPage = () => {
     }}>
       <Container maxWidth="xl">
         {/* Hero Section */}
-        <Fade in={isVisible} timeout={1000}>
+        <div>
           <HeroContainer>
             <Container maxWidth="lg">
               <Box sx={{ 
                 display: 'grid',
-                gridTemplateColumns: { xs: '1fr', lg: '1fr 500px' },
-                gap: 6,
+                gridTemplateColumns: { xs: '1fr', lg: '1fr 400px' },
+                gap: 4,
                 alignItems: 'center',
-                py: 6
+                py: 4
               }}>
                 {/* Left Content */}
                 <Box>
-                  <AnimatedTitle variant={isMobile ? 'h3' : 'h2'}>
-                    Shape the Future of <span className="highlight-gradient">Tech Learning</span>
-                  </AnimatedTitle>
+                  <Typography variant={isMobile ? 'h4' : 'h3'} sx={{ fontWeight: 700, mb: 2 }}>
+                    Shape the Future of <span style={{ color: '#4f46e5' }}>Tech Learning</span>
+                  </Typography>
                   
                   <Typography 
-                    variant="h6" 
+                    variant="body1" 
                     sx={{ 
-                      mb: 4, 
+                      mb: 3, 
                       color: 'text.secondary',
-                      lineHeight: 1.6,
-                      animation: `${slideInFromLeft} 1s ease-out 0.3s both`
+                      lineHeight: 1.6
                     }}
                   >
                     Join our global community of developers and contribute your knowledge to help millions 
-                    of learners discover new skills and tools. Every contribution matters! 🚀
+                    of learners discover new skills and tools. Every contribution matters!
                   </Typography>
 
                   {/* Call to Action Chips */}
                   <Box sx={{ 
                     display: 'flex', 
                     gap: 2, 
-                    flexWrap: 'wrap',
-                    animation: `${slideInFromLeft} 1s ease-out 0.9s both`
+                    flexWrap: 'wrap'
                   }}>
                     <Chip
                       icon={<SparkleIcon />}
                       label="Easy to Contribute"
                       color="primary"
                       variant="filled"
-                      sx={{ 
-                        px: 1,
-                        fontWeight: 600,
-                        boxShadow: '0 4px 15px rgba(79, 70, 229, 0.3)',
-                        '&:hover': {
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 6px 20px rgba(79, 70, 229, 0.4)',
-                        }
-                      }}
+                      sx={{ px: 1, fontWeight: 600 }}
                     />
                     <Chip
                       icon={<TrendingUpIcon />}
                       label="Instant Impact"
                       color="secondary"
                       variant="filled"
-                      sx={{ 
-                        px: 1,
-                        fontWeight: 600,
-                        boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
-                        '&:hover': {
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 6px 20px rgba(16, 185, 129, 0.4)',
-                        }
-                      }}
+                      sx={{ px: 1, fontWeight: 600 }}
                     />
                   </Box>
                 </Box>
 
-                {/* Right Content - Animated Image */}
-                <Zoom in={isVisible} timeout={1200}>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}>
-                    <AnimatedImage
-                      src={contributionImage}
-                      alt="Community Contribution Illustration - People collaborating with technology"
-                      className="community-image-clean image-background-removal"
-                      removeBackground={true}
-                      onError={(e) => {
-                        console.log('Main image not found, falling back to existing image');
-                        // Keep the image visible but show fallback
-                        if (e.target.src.includes('3046755_32621.jpg')) {
-                          console.log('📁 To see your custom image: Place 3046755_32621.jpg in frontend/src/assets/images/');
-                        }
-                      }}
-                      onLoad={() => {
-                        console.log('✅ Image loaded successfully with background removal!');
-                      }}
-                    />
-                  </Box>
-                </Zoom>
+                {/* Right Content - Simple Image */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}>
+                  <img
+                    src={contributionImage}
+                    alt="Community Contribution"
+                    style={{
+                      width: '100%',
+                      maxWidth: '350px',
+                      height: 'auto',
+                      borderRadius: '16px',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                </Box>
               </Box>
             </Container>
           </HeroContainer>
-        </Fade>
+        </div>
 
 
 
         {/* Tabs Section */}
-        <Fade in={isVisible} timeout={2000}>
+        <Container maxWidth="md" sx={{ mt: 4 }}>
           <Paper 
-            elevation={0}
+            elevation={2}
             sx={{ 
-              background: 'transparent',
-              borderRadius: '24px',
-              overflow: 'hidden'
+              background: 'white',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              p: 3
             }}
           >
             <StyledTabs
@@ -439,25 +415,18 @@ const ContributionPage = () => {
               />
             </StyledTabs>
 
-            {/* Tab Content with Smooth Transitions */}
+            {/* Tab Content */}
             <Box sx={{ mt: 4 }}>
-              <Slide 
-                direction={activeTab === 0 ? "right" : "left"} 
-                in={true} 
-                timeout={500}
-                key={activeTab}
-              >
-                <div>
-                  {activeTab === 0 ? (
-                    <SkillContributionForm />
-                  ) : (
-                    <ToolContributionForm />
-                  )}
-                </div>
-              </Slide>
+              <div>
+                {activeTab === 0 ? (
+                  <SkillContributionForm />
+                ) : (
+                  <ToolContributionForm />
+                )}
+              </div>
             </Box>
           </Paper>
-        </Fade>
+        </Container>
       </Container>
     </Box>
   );

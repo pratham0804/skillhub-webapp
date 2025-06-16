@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } f
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
-import UserProfile from './pages/UserProfile';
+import Profile from './pages/Profile';
 import ResumePage from './pages/ResumePage';
 import SkillGapAnalysis from './components/skills/SkillGapAnalysis';
 import DataDashboard from './components/data/DataDashboard';
@@ -159,7 +159,7 @@ const Home = () => {
         </div>
         
       <div className="hero-content">
-          <div className="hero-badge animate-fade-in">
+          <div className="hero-badge animate-fade-in" style={{ display: 'none' }}>
             <span className="badge-icon">🚀</span>
             <span>Your Career Transformation Starts Here</span>
           </div>
@@ -175,7 +175,7 @@ const Home = () => {
         </p>
           <div className="hero-buttons animate-slide-up delay-200">
             <Link to="/skill-gap-analysis" className="hero-cta primary">
-              <span className="btn-icon">📊</span>
+              <span className="btn-icon">🎯</span>
               Analyze Your Skills
             </Link>
             <Link to="/data-dashboard" className="hero-cta secondary">
@@ -205,7 +205,7 @@ const Home = () => {
       <div className="features-grid">
         <div className="feature-card animate-slide-up delay-100">
           <div className="feature-icon">
-            <div className="icon-bg">🚀</div>
+            <div className="icon-bg">🧠</div>
           </div>
           <h3>AI-Powered Skill Analysis</h3>
           <p>Get personalized insights into your skillset with our advanced AI that identifies gaps and suggests learning paths.</p>
@@ -257,7 +257,7 @@ const Home = () => {
     <div className="how-it-works-section">
       <div className="section-header">
         <div className="section-badge animate-fade-in">
-          <span>🚀 Simple Process</span>
+          <span>⚡ Simple Process</span>
         </div>
         <h2 className="animate-slide-up">How SkillHub Works</h2>
         <p className="subtitle animate-slide-up delay-100">Transform your career with our streamlined approach</p>
@@ -334,7 +334,7 @@ const Home = () => {
       </div>
       
         <div className="process-step-card">
-          <div className="step-icon-modern">🚀</div>
+          <div className="step-icon-modern">🎯</div>
           <div className="step-header">
             <div className="step-number-modern">4</div>
             <div className="step-title">
@@ -630,7 +630,7 @@ function AppContent() {
   }, []);
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <PageTracker />
       <Header />
       <main className="app-main">
@@ -642,12 +642,7 @@ function AppContent() {
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={
               <ProtectedRoute>
-                <UserProfile />
-              </ProtectedRoute>
-            } />
-            <Route path="/resume" element={
-              <ProtectedRoute>
-                <ResumePage />
+                <Profile />
               </ProtectedRoute>
             } />
             <Route path="/resume-builder" element={
@@ -690,7 +685,7 @@ function AppContent() {
                 <ul className="footer-links">
                   <li><Link to="/skill-gap-analysis">Skill Analysis</Link></li>
                   <li><Link to="/data-dashboard">Market Trends</Link></li>
-                  <li><Link to="/resume">Resume Optimizer</Link></li>
+                  <li><Link to="/resume-builder">Resume Builder</Link></li>
                   <li><Link to="/contribute">Contribute Data</Link></li>
                 </ul>
               </div>
