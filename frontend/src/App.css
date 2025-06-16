@@ -573,9 +573,11 @@
 }
 
 .section-header h2 {
-  font-size: 2.4rem;
-  margin-bottom: 1.5rem;
-  order: 2;
+  font-size: 3.2rem;
+  margin-bottom: 2rem;
+  font-weight: 800;
+  color: #1f2937;
+  line-height: 1.2;
 }
 
 .section-header .subtitle {
@@ -748,8 +750,9 @@
   }
 
   .section-header h2 {
-    font-size: 2.4rem;
-    margin-bottom: 1rem;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1f2937;
     order: 2;
   }
 
@@ -4391,6 +4394,8 @@
 
   .section-header h2 {
     font-size: 2rem;
+    font-weight: 800;
+    color: #1f2937;
     line-height: 1.2;
     margin-bottom: 1.2rem;
   }
@@ -4420,6 +4425,8 @@
 
   .how-it-works-section h2 {
     font-size: 2rem;
+    font-weight: 800;
+    color: #1f2937;
     line-height: 1.2;
     margin-bottom: 1.2rem;
   }
