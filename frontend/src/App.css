@@ -729,18 +729,30 @@
   }
 
   .section-header {
-  margin-bottom: 3rem;
+    margin-bottom: 3rem;
     padding: 0 1rem;
-}
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .section-header .section-badge {
+    margin-bottom: 1rem;
+    order: 1;
+  }
 
   .section-header h2 {
     font-size: 2.4rem;
+    margin-bottom: 1rem;
+    order: 2;
   }
 
-  .subtitle {
+  .section-header .subtitle {
     font-size: 1.1rem;
     line-height: 1.6;
-}
+    order: 3;
+  }
 
   .features-grid {
     grid-template-columns: 1fr;
@@ -750,23 +762,86 @@
 
   .feature-card {
     padding: 2rem;
-}
+  }
 
   .icon-bg {
     width: 3.5rem;
     height: 3.5rem;
-  font-size: 1.8rem;
-}
+    font-size: 1.8rem;
+  }
 
-.feature-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
+  /* How SkillHub Works section mobile improvements */
+  .how-it-works-section {
+    padding: 4rem 0;
+  }
 
-.feature-card p {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-}
+  .how-it-works-section .section-header {
+    margin-bottom: 3rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .how-it-works-section .section-badge {
+    margin-bottom: 1rem;
+    order: 1;
+  }
+
+  .how-it-works-section h2 {
+    order: 2;
+    margin-bottom: 1rem;
+  }
+
+  .how-it-works-section .subtitle {
+    order: 3;
+  }
+
+  .process-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 0 1rem;
+    text-align: center;
+  }
+
+  .process-step-card {
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .step-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .step-number-modern {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.2rem;
+    margin: 0 auto;
+  }
+
+  .step-title h3 {
+    font-size: 1.4rem;
+    text-align: center;
+  }
+
+  .step-icon-modern {
+    font-size: 2rem;
+    top: 0.5rem;
+    right: 1rem;
+  }
+
+  .step-description {
+    text-align: center;
+  }
+
+  .step-features {
+    text-align: left;
+    max-width: 300px;
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 480px) {
@@ -4287,5 +4362,72 @@
   .profile-tabs svg {
     width: 0.75rem !important;
     height: 0.75rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-header {
+    padding: 0 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-header h2 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .section-header .subtitle {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .feature-card {
+    padding: 1.5rem;
+  }
+
+  /* How SkillHub Works mobile improvements */
+  .how-it-works-section {
+    padding: 3rem 0;
+  }
+
+  .how-it-works-section .section-header {
+    margin-bottom: 2rem;
+    padding: 0 0.5rem;
+  }
+
+  .how-it-works-section h2 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .how-it-works-section .subtitle {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .process-container {
+    gap: 1.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .process-step-card {
+    padding: 1.5rem;
+  }
+
+  .step-title h3 {
+    font-size: 1.2rem;
+  }
+
+  .step-description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .step-features {
+    max-width: 280px;
+  }
+
+  .step-features li {
+    font-size: 0.9rem;
   }
 }
