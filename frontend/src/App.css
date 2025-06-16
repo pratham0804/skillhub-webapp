@@ -4352,6 +4352,7 @@
 @media (max-width: 640px) {
   .profile-tabs {
     padding: 0.5rem !important;
+    margin-bottom: 3.5rem !important;
   }
   
   .profile-tabs button {
