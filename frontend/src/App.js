@@ -202,53 +202,66 @@ const Home = () => {
         <p className="subtitle animate-slide-up delay-100">Gain the competitive edge in the tech industry with our powerful tools</p>
       </div>
       
-      <div className="features-grid">
-        <div className="feature-card animate-slide-up delay-100">
+      {/* Features List - One after another */}
+      <div className="features-list">
+        <div className="feature-item animate-slide-up delay-100">
           <div className="feature-icon">
             <div className="icon-bg">🧠</div>
           </div>
-          <h3>AI-Powered Skill Analysis</h3>
-          <p>Get personalized insights into your skillset with our advanced AI that identifies gaps and suggests learning paths.</p>
+          <div className="feature-content">
+            <h3>AI-Powered Skill Analysis</h3>
+            <p>Get personalized insights into your skillset with our advanced AI that identifies gaps and suggests learning paths tailored to your career goals.</p>
+          </div>
         </div>
         
-        <div className="feature-card animate-slide-up delay-200">
+        <div className="feature-item animate-slide-up delay-200">
           <div className="feature-icon">
             <div className="icon-bg">📊</div>
           </div>
-          <h3>Real-Time Market Trends</h3>
-          <p>Stay ahead with live data on the most in-demand skills, salary ranges, and emerging technologies in your field.</p>
+          <div className="feature-content">
+            <h3>Real-Time Market Trends</h3>
+            <p>Stay ahead with live data on the most in-demand skills, salary ranges, and emerging technologies in your field with comprehensive market intelligence.</p>
+          </div>
         </div>
         
-        <div className="feature-card animate-slide-up delay-300">
+        <div className="feature-item animate-slide-up delay-300">
           <div className="feature-icon">
             <div className="icon-bg">🤝</div>
           </div>
-          <h3>Community-Driven Insights</h3>
-          <p>Contribute to and benefit from our growing database of skills and experiences shared by professionals like you.</p>
+          <div className="feature-content">
+            <h3>Community-Driven Insights</h3>
+            <p>Contribute to and benefit from our growing database of skills and experiences shared by professionals like you, creating a collaborative learning environment.</p>
+          </div>
         </div>
         
-        <div className="feature-card animate-slide-up delay-400">
+        <div className="feature-item animate-slide-up delay-400">
           <div className="feature-icon">
             <div className="icon-bg">🎯</div>
           </div>
-          <h3>Career Path Planning</h3>
-          <p>Set goals, track progress, and get personalized recommendations to reach your dream tech career faster.</p>
+          <div className="feature-content">
+            <h3>Career Path Planning</h3>
+            <p>Set goals, track progress, and get personalized recommendations to reach your dream tech career faster with strategic roadmaps and milestones.</p>
+          </div>
         </div>
         
-        <div className="feature-card animate-slide-up delay-500">
+        <div className="feature-item animate-slide-up delay-500">
           <div className="feature-icon">
             <div className="icon-bg">📄</div>
           </div>
-          <h3>Resume Optimization</h3>
-          <p>Upload your resume and get AI-powered feedback on how to highlight your skills for maximum impact.</p>
+          <div className="feature-content">
+            <h3>Resume Optimization</h3>
+            <p>Upload your resume and get AI-powered feedback on how to highlight your skills for maximum impact, with detailed analysis and improvement suggestions.</p>
+          </div>
         </div>
         
-        <div className="feature-card animate-slide-up delay-600">
+        <div className="feature-item animate-slide-up delay-600">
           <div className="feature-icon">
             <div className="icon-bg">🌟</div>
           </div>
-          <h3>Skill Certification</h3>
-          <p>Validate your expertise with our skill assessments and earn certificates recognized by top employers.</p>
+          <div className="feature-content">
+            <h3>Skill Certification</h3>
+            <p>Validate your expertise with our skill assessments and earn certificates recognized by top employers, boosting your professional credibility.</p>
+          </div>
         </div>
       </div>
     </div>

@@ -562,28 +562,43 @@ const Profile = () => {
             {/* Main Tabs */}
             <div className="bg-white rounded-lg shadow-sm">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <div className="px-6 pt-6">
-                  <TabsList className="grid w-full grid-cols-4 bg-gray-100 rounded-lg gap-2 p-2">
-                    <TabsTrigger value="overview" className="flex items-center gap-2 mx-1">
-                      <User className="w-4 h-4" />
-                      Overview
+                <div className="px-3 sm:px-6 pt-4 sm:pt-6">
+                  <TabsList className="profile-tabs grid w-full grid-cols-2 sm:grid-cols-4 bg-gray-100 rounded-lg gap-1 sm:gap-2 p-1 sm:p-2">
+                    <TabsTrigger 
+                      value="overview" 
+                      className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm hover:bg-gray-50"
+                    >
+                      <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline">Overview</span>
+                      <span className="xs:hidden">Info</span>
                     </TabsTrigger>
-                    <TabsTrigger value="skills" className="flex items-center gap-2 mx-1">
-                      <Target className="w-4 h-4" />
+                    <TabsTrigger 
+                      value="skills" 
+                      className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm hover:bg-gray-50"
+                    >
+                      <Target className="w-3 h-3 sm:w-4 sm:h-4" />
                       Skills
                     </TabsTrigger>
-                    <TabsTrigger value="preferences" className="flex items-center gap-2 mx-1">
-                      <Settings className="w-4 h-4" />
-                      Preferences
+                    <TabsTrigger 
+                      value="preferences" 
+                      className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm hover:bg-gray-50"
+                    >
+                      <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline">Preferences</span>
+                      <span className="xs:hidden">Prefs</span>
                     </TabsTrigger>
-                    <TabsTrigger value="achievements" className="flex items-center gap-2 mx-1">
-                      <Award className="w-4 h-4" />
-                      Achievements
+                    <TabsTrigger 
+                      value="achievements" 
+                      className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm hover:bg-gray-50"
+                    >
+                      <Award className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline">Achievements</span>
+                      <span className="xs:hidden">Awards</span>
                     </TabsTrigger>
                   </TabsList>
                 </div>
 
-                <div className="px-6 pb-6">
+                <div className="px-3 sm:px-6 pb-4 sm:pb-6">
                   {/* Overview Tab */}
                   <TabsContent value="overview" className="space-y-6 mt-6">
                     {/* Personal Information */}
