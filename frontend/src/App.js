@@ -310,28 +310,28 @@ const Home = () => {
           </div>
       </div>
       
-        <div className="process-step-card">
-          <div className="step-icon-modern">📚</div>
+                <div className="process-step-card">
+          <div className="step-icon-modern">📈</div>
           <div className="step-header">
             <div className="step-number-modern">3</div>
             <div className="step-title">
-              <h3>Personalized Learning</h3>
+              <h3>Trending Market Skills</h3>
             </div>
           </div>
           <div className="step-body">
             <p className="step-description">
-              Receive curated learning paths, resources, and recommendations tailored to your goals. Track progress as you develop new skills and expertise.
+              Stay ahead with real-time market insights on the most in-demand skills and tools. Discover trending technologies and adapt your learning strategy.
             </p>
             <ul className="step-features">
-              <li><span className="feature-check">✓</span>Custom learning paths</li>
-              <li><span className="feature-check">✓</span>Progress tracking</li>
-              <li><span className="feature-check">✓</span>Resource curation</li>
+              <li><span className="feature-check">✓</span>Market trend analysis</li>
+              <li><span className="feature-check">✓</span>In-demand skills tracking</li>
+              <li><span className="feature-check">✓</span>Technology adoption rates</li>
             </ul>
             <div className="step-cta">
-              <a href="/data-dashboard" className="step-link">Explore Resources</a>
+              <a href="/data-dashboard" className="step-link">View Market Trends</a>
             </div>
           </div>
-      </div>
+        </div>
       
         <div className="process-step-card">
           <div className="step-icon-modern">🎯</div>
@@ -526,11 +526,11 @@ const Header = () => {
             <li><NavLink to="/about">About</NavLink></li>
             {currentUser ? (
               <>
-                <li><NavLink to="/profile">Profile</NavLink></li>
                 <li><NavLink to="/skill-gap-analysis">Skills</NavLink></li>
                 <li><NavLink to="/resume-builder">Resume</NavLink></li>
                 <li><NavLink to="/data-dashboard">Trends</NavLink></li>
                 <li><NavLink to="/contribute">Contribute</NavLink></li>
+                <li><NavLink to="/profile">Profile</NavLink></li>
               </>
             ) : (
               <li><NavLink to="/contribute">Contribute</NavLink></li>
@@ -574,11 +574,11 @@ const Header = () => {
               <li><NavLink to="/about" onClick={closeMobileMenu}>ℹ️ About</NavLink></li>
               {currentUser ? (
                 <>
-                  <li><NavLink to="/profile" onClick={closeMobileMenu}>👤 Profile</NavLink></li>
                   <li><NavLink to="/skill-gap-analysis" onClick={closeMobileMenu}>📊 Skills Analysis</NavLink></li>
                   <li><NavLink to="/resume-builder" onClick={closeMobileMenu}>📄 Resume Builder</NavLink></li>
                   <li><NavLink to="/data-dashboard" onClick={closeMobileMenu}>📈 Market Trends</NavLink></li>
                   <li><NavLink to="/contribute" onClick={closeMobileMenu}>🤝 Contribute</NavLink></li>
+                  <li><NavLink to="/profile" onClick={closeMobileMenu}>👤 Profile</NavLink></li>
                   {currentUser.email && currentUser.email.includes('admin') && (
                     <li><Link to="/admin/contributions" onClick={closeMobileMenu} className="admin-mobile-link">⚙️ Admin Panel</Link></li>
                   )}

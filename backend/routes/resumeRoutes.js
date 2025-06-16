@@ -75,4 +75,38 @@ router.post('/add-missing-skills', resumeController.addMissingSkills);
 // Get resume
 router.get('/', resumeController.getResume);
 
+// Enhanced Analysis Features
+router.get('/enhanced-analysis', resumeController.getEnhancedResumeAnalysis);
+router.get('/salary-insights', resumeController.getSalaryInsights);
+router.get('/interview-questions', resumeController.getInterviewQuestions);
+router.get('/market-trends', resumeController.getMarketTrends);
+
+// Debug endpoint (remove in production)
+router.get('/debug/add-skill', resumeController.debugAddSkill);
+
+// Error handling middleware for multer
+router.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'File too large. Maximum size is 10MB.'
+      });
+    }
+  }
+  
+  if (error.message.includes('Only')) {
+    return res.status(400).json({
+      status: 'fail',
+      message: error.message
+    });
+  }
+  
+  res.status(500).json({
+    status: 'error',
+    message: 'File upload error',
+    error: error.message
+  });
+});
+
 module.exports = router; 

@@ -145,6 +145,10 @@ const Profile = () => {
 
       if (response.data.status === 'success') {
         setEditMode(false);
+        
+        // Signal other components to refresh
+        localStorage.setItem('profileUpdated', Date.now().toString());
+        
         toast({
           title: "Profile Updated",
           description: "Your profile has been successfully updated.",
@@ -214,6 +218,9 @@ const Profile = () => {
         setNewSkill({ skillName: '', proficiency: 'Beginner', category: 'Technical' });
         setShowSkillDialog(false);
         
+        // Signal other components to refresh
+        localStorage.setItem('profileUpdated', Date.now().toString());
+        
         toast({
           title: "Skill Added",
           description: `${skill.skillName} has been added to your profile.`,
@@ -258,6 +265,9 @@ const Profile = () => {
           ...prev,
           existingSkills: updatedSkills
         }));
+        
+        // Signal other components to refresh
+        localStorage.setItem('profileUpdated', Date.now().toString());
         
         toast({
           title: "Skill Removed",
@@ -386,6 +396,9 @@ const Profile = () => {
         
         setExtractedSkills([]);
         setShowResumeDialog(false);
+        
+        // Signal other components to refresh
+        localStorage.setItem('profileUpdated', Date.now().toString());
         
         toast({
           title: "Skills Added",

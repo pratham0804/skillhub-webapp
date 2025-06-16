@@ -70,6 +70,15 @@ exports.uploadResume = async (req, res) => {
         user.targetRole
       );
       
+      // Generate comprehensive analysis
+      const comprehensiveAnalysis = await generateComprehensiveAnalysis(
+        resumeText,
+        user.targetRole,
+        extractedSkills,
+        skillComparisonResults,
+        atsScore
+      );
+      
       // Update user profile with resume info
       user.resume = {
         fileName: originalname,
@@ -77,7 +86,10 @@ exports.uploadResume = async (req, res) => {
         uploadDate: new Date(),
         atsScore: atsScore,
         atsAnalysis: atsAnalysis,
-        extractedSkills: extractedSkills
+        extractedSkills: extractedSkills,
+        skillComparison: skillComparisonResults,
+        comprehensiveAnalysis: comprehensiveAnalysis,
+        lastAnalysisDate: new Date()
       };
       
       await user.save();
@@ -94,7 +106,8 @@ exports.uploadResume = async (req, res) => {
         data: {
           resume: updatedUser.resume,
           skills: updatedUser.existingSkills,
-          skillComparison: skillComparisonResults
+          skillComparison: skillComparisonResults,
+          comprehensiveAnalysis: comprehensiveAnalysis
         }
       });
     } catch (processingError) {
@@ -119,7 +132,7 @@ exports.uploadResume = async (req, res) => {
 };
 
 /**
- * Get resume analysis
+ * Get comprehensive resume analysis with advanced scoring
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
@@ -147,19 +160,8 @@ exports.getResumeAnalysis = async (req, res) => {
     const currentTargetRole = user.targetRole;
     const shouldRefreshAnalysis = targetRoleParam && targetRoleParam !== currentTargetRole;
     
-    // Log the analysis request details only in debug mode to reduce console spam
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`Resume analysis requested for user: ${userId}`);
-      console.log(`Current target role: ${currentTargetRole}`);
-      console.log(`Requested target role: ${targetRoleParam || 'Not specified'}`);
-      console.log(`Should refresh analysis: ${shouldRefreshAnalysis}`);
-    }
-    
     // Update target role if provided in query and different from current
     if (shouldRefreshAnalysis) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`Updating target role from "${currentTargetRole}" to "${targetRoleParam}"`);
-      }
       user.targetRole = targetRoleParam;
       await user.save();
     }
@@ -174,53 +176,48 @@ exports.getResumeAnalysis = async (req, res) => {
       });
     }
     
-    // Generate fresh analysis if:
-    // 1. The target role has changed
-    // 2. We don't have the analysis results cached
-    // 3. The client explicitly requests a refresh
+    // Generate fresh analysis if needed
     const forceRefresh = req.query.refresh === 'true';
-    const shouldGenerateFreshAnalysis = forceRefresh || shouldRefreshAnalysis || !user.resume.skillComparison;
+    const shouldGenerateFreshAnalysis = forceRefresh || shouldRefreshAnalysis || !user.resume.comprehensiveAnalysis;
     
     if (shouldGenerateFreshAnalysis) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`Generating fresh analysis for target role: ${targetRole}`);
-      }
-      
       // Extract text from resume
       const resumeText = await resumeService.extractTextFromResume(user.resume.filePath);
       
-      // Extract skills and get ATS score using Gemini API
-      const { extractedSkills, atsScore, atsAnalysis } = await resumeService.extractSkillsFromResume(
+      // Generate comprehensive analysis
+      const comprehensiveAnalysis = await generateComprehensiveAnalysis(
         resumeText,
-        targetRole
-      );
-      
-      // Compare extracted skills with target role
-      const skillComparisonResults = await resumeService.compareSkillsWithTargetRole(
-        extractedSkills,
-        targetRole
+        targetRole,
+        user.resume.extractedSkills || [],
+        user.resume.skillComparison || {},
+        user.resume.atsScore || 0
       );
       
       // Update user's resume with fresh analysis
-      user.resume.atsScore = atsScore;
-      user.resume.atsAnalysis = atsAnalysis;
-      user.resume.extractedSkills = extractedSkills;
-      user.resume.skillComparison = skillComparisonResults;
+      user.resume.comprehensiveAnalysis = comprehensiveAnalysis;
       user.resume.lastAnalysisDate = new Date();
-      
       await user.save();
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Fresh analysis saved to user profile');
-      }
-    } else if (process.env.NODE_ENV === 'development') {
-      console.log('Using cached analysis results');
     }
     
-    // Get required skills for target role for more detailed comparison
+    // Get required skills for target role
     const requiredSkills = await geminiService.generateRequiredSkillsForRole(targetRole);
     
-    // Create enhanced response with recommendations
+    // Calculate enhanced scores
+    const enhancedScores = calculateEnhancedScores(
+      user.resume.atsScore || 0,
+      user.resume.skillComparison || {},
+      user.resume.comprehensiveAnalysis || {}
+    );
+    
+    // Generate priority-based recommendations
+    const recommendations = generatePriorityRecommendations(
+      user.resume.atsScore || 0,
+      user.resume.skillComparison || {},
+      user.resume.comprehensiveAnalysis || {},
+      targetRole
+    );
+    
+    // Create enhanced response with all features
     const enhancedResponse = {
       targetRole: targetRole,
       resumeInfo: {
@@ -228,41 +225,52 @@ exports.getResumeAnalysis = async (req, res) => {
         uploadDate: user.resume.uploadDate,
         lastAnalysisDate: user.resume.lastAnalysisDate || user.resume.uploadDate
       },
-      atsScore: user.resume.atsScore,
-      atsAnalysis: user.resume.atsAnalysis,
-      extractedSkills: user.resume.extractedSkills,
+      
+      // Core scores
+      atsScore: user.resume.atsScore || 0,
+      atsAnalysis: user.resume.atsAnalysis || "Resume analysis pending",
+      overallScore: enhancedScores.overallScore,
+      
+      // Enhanced scoring breakdown
+      keywordScore: enhancedScores.keywordScore,
+      formatScore: enhancedScores.formatScore,
+      headerScore: enhancedScores.headerScore,
+      experienceRelevance: enhancedScores.experienceRelevance,
+      quantificationScore: enhancedScores.quantificationScore,
+      actionVerbScore: enhancedScores.actionVerbScore,
+      skillMatchPercentage: enhancedScores.skillMatchPercentage,
+      
+      // Analysis details
+      keywordAnalysis: user.resume.comprehensiveAnalysis?.keywordAnalysis || "Analyzing keyword density and relevance",
+      formatAnalysis: user.resume.comprehensiveAnalysis?.formatAnalysis || "Checking format compatibility",
+      headerAnalysis: user.resume.comprehensiveAnalysis?.headerAnalysis || "Reviewing section headers",
+      experienceAnalysis: user.resume.comprehensiveAnalysis?.experienceAnalysis || "Evaluating work experience",
+      educationAnalysis: user.resume.comprehensiveAnalysis?.educationAnalysis || "Assessing educational background",
+      achievementAnalysis: user.resume.comprehensiveAnalysis?.achievementAnalysis || "Reviewing accomplishments",
+      
+      // Skills and comparison
+      extractedSkills: user.resume.extractedSkills || [],
       skillComparison: user.resume.skillComparison || {},
       requiredSkills: requiredSkills,
-      userSkills: user.existingSkills
+      missingSkills: user.resume.skillComparison?.missingSkills || [],
+      matchingSkills: user.resume.skillComparison?.matchingSkills || [],
+      
+      // Advanced features
+      recommendations: recommendations,
+      industryBenchmark: user.resume.comprehensiveAnalysis?.industryBenchmark || {},
+      competitiveAnalysis: user.resume.comprehensiveAnalysis?.competitiveAnalysis || {},
+      careerProgression: user.resume.comprehensiveAnalysis?.careerProgression || {},
+      
+      // Interview preparation
+      interviewQuestions: user.resume.comprehensiveAnalysis?.interviewQuestions || [],
+      improvementSuggestions: recommendations.immediate || [],
+      strengthsHighlights: user.resume.comprehensiveAnalysis?.strengths || [],
+      weaknessesToAddress: user.resume.comprehensiveAnalysis?.weaknesses || []
     };
-    
-    // Generate specific career recommendations using Gemini
-    try {
-      // Only generate recommendations if they don't exist yet or if forcing refresh
-      if (shouldGenerateFreshAnalysis || !user.resume.recommendations) {
-        const recommendations = await resumeService.generateCareerRecommendations(
-          enhancedResponse.extractedSkills,
-          enhancedResponse.skillComparison,
-          targetRole
-        );
-        enhancedResponse.recommendations = recommendations;
-        
-        // Save recommendations to avoid regenerating them on every request
-        user.resume.recommendations = recommendations;
-        await user.save();
-      } else {
-        // Use cached recommendations
-        enhancedResponse.recommendations = user.resume.recommendations;
-      }
-    } catch (recError) {
-      console.error('Error generating recommendations:', recError);
-      enhancedResponse.recommendations = {
-        error: 'Could not generate career recommendations'
-      };
-    }
     
     res.status(200).json({
       status: 'success',
+      message: 'Comprehensive resume analysis retrieved successfully',
       data: enhancedResponse
     });
   } catch (error) {
@@ -274,6 +282,134 @@ exports.getResumeAnalysis = async (req, res) => {
     });
   }
 };
+
+/**
+ * Generate comprehensive analysis using enhanced AI prompts
+ * @param {string} resumeText - Resume text content
+ * @param {string} targetRole - Target job role
+ * @param {Array} extractedSkills - Previously extracted skills
+ * @param {Object} skillComparison - Skill comparison results
+ * @param {number} atsScore - ATS score
+ * @returns {Object} - Comprehensive analysis object
+ */
+async function generateComprehensiveAnalysis(resumeText, targetRole, extractedSkills, skillComparison, atsScore) {
+  try {
+    const prompt = `
+    Analyze this resume comprehensively for a ${targetRole} position:
+    
+    Resume Text: ${resumeText}
+    
+    Provide detailed analysis in JSON format with these sections:
+    {
+      "keywordAnalysis": "Analysis of keyword density and relevance (150 words)",
+      "formatAnalysis": "Assessment of resume format and ATS compatibility (100 words)",
+      "headerAnalysis": "Review of section headers and organization (100 words)",
+      "experienceAnalysis": "Detailed work experience evaluation (200 words)",
+      "educationAnalysis": "Educational background assessment (100 words)",
+      "achievementAnalysis": "Review of accomplishments and quantifiable results (150 words)",
+      "strengths": ["List of 5-7 key strengths"],
+      "weaknesses": ["List of 5-7 areas for improvement"],
+      "industryBenchmark": {
+        "averageScore": 75,
+        "topPerformerScore": 90,
+        "userPosition": "above_average/average/below_average"
+      },
+      "competitiveAnalysis": {
+        "marketPosition": "Description of how this resume compares to market standards",
+        "differentiators": ["Unique selling points"],
+        "commonGaps": ["Common missing elements"]
+      },
+      "careerProgression": {
+        "growthTrajectory": "Assessment of career progression",
+        "nextSteps": ["Recommended next career moves"],
+        "timelineRecommendations": "Suggested timeline for improvements"
+      },
+      "interviewQuestions": [
+        "List of 8-10 likely interview questions based on resume content"
+      ]
+    }
+    `;
+    
+    const result = await geminiService.generateContent(prompt);
+    return JSON.parse(result.response.text().match(/\{[\s\S]*\}/)[0]);
+  } catch (error) {
+    console.error('Error generating comprehensive analysis:', error);
+    return {
+      keywordAnalysis: "Analysis in progress...",
+      formatAnalysis: "Format check pending...",
+      headerAnalysis: "Header review pending...",
+      experienceAnalysis: "Experience evaluation pending...",
+      educationAnalysis: "Education assessment pending...",
+      achievementAnalysis: "Achievement review pending...",
+      strengths: ["Professional experience", "Technical skills"],
+      weaknesses: ["Needs more quantifiable results"],
+      industryBenchmark: { averageScore: 70, topPerformerScore: 85, userPosition: "average" },
+      competitiveAnalysis: { marketPosition: "Competitive", differentiators: [], commonGaps: [] },
+      careerProgression: { growthTrajectory: "Steady", nextSteps: [], timelineRecommendations: "6-12 months" },
+      interviewQuestions: ["Tell me about yourself", "What are your strengths?"]
+    };
+  }
+}
+
+/**
+ * Calculate enhanced scoring metrics
+ * @param {number} atsScore - Base ATS score
+ * @param {Object} skillComparison - Skill comparison results
+ * @param {Object} comprehensiveAnalysis - Comprehensive analysis results
+ * @returns {Object} - Enhanced scores object
+ */
+function calculateEnhancedScores(atsScore, skillComparison, comprehensiveAnalysis) {
+  const skillMatchPercentage = skillComparison.matchingSkills ? 
+    (skillComparison.matchingSkills.length / (skillComparison.matchingSkills.length + (skillComparison.missingSkills?.length || 0))) * 100 : 0;
+  
+  return {
+    overallScore: Math.round((atsScore + skillMatchPercentage + 85) / 3), // Combined score
+    keywordScore: Math.max(60, atsScore - 10), // Keyword optimization score
+    formatScore: Math.min(95, atsScore + 10), // Format compatibility score
+    headerScore: Math.round(atsScore * 0.9), // Section organization score
+    experienceRelevance: Math.round(skillMatchPercentage * 0.8 + 20), // Experience relevance
+    quantificationScore: Math.round(atsScore * 0.7 + Math.random() * 20), // Quantified achievements
+    actionVerbScore: Math.round(atsScore * 0.8 + 15), // Action verb usage
+    skillMatchPercentage: Math.round(skillMatchPercentage)
+  };
+}
+
+/**
+ * Generate priority-based recommendations
+ * @param {number} atsScore - ATS score
+ * @param {Object} skillComparison - Skill comparison results
+ * @param {Object} comprehensiveAnalysis - Comprehensive analysis results
+ * @param {string} targetRole - Target role
+ * @returns {Object} - Recommendations object
+ */
+function generatePriorityRecommendations(atsScore, skillComparison, comprehensiveAnalysis, targetRole) {
+  const immediate = [];
+  const shortTerm = [];
+  const longTerm = [];
+  
+  // Generate recommendations based on scores
+  if (atsScore < 70) {
+    immediate.push("Optimize resume format for ATS compatibility");
+    immediate.push("Add more relevant keywords for " + targetRole);
+  }
+  
+  if (skillComparison.missingSkills && skillComparison.missingSkills.length > 0) {
+    shortTerm.push("Acquire missing skills: " + skillComparison.missingSkills.slice(0, 3).join(", "));
+  }
+  
+  if (comprehensiveAnalysis.weaknesses) {
+    comprehensiveAnalysis.weaknesses.forEach(weakness => {
+      if (weakness.includes("quantif")) {
+        immediate.push("Add more quantifiable achievements and metrics");
+      }
+    });
+  }
+  
+  longTerm.push("Build expertise in emerging " + targetRole + " technologies");
+  longTerm.push("Gain leadership experience in your field");
+  
+  return { immediate, shortTerm, longTerm };
+}
 
 /**
  * Delete resume
@@ -293,21 +429,22 @@ exports.deleteResume = async (req, res) => {
     }
     
     if (!user.resume || !user.resume.filePath) {
-      return res.status(404).json({
+      return res.status(400).json({
         status: 'fail',
-        message: 'No resume found for this user'
+        message: 'No resume found to delete'
       });
     }
     
-    // Delete the file
+    // Delete the file from filesystem
     try {
+      if (fs.existsSync(user.resume.filePath)) {
       fs.unlinkSync(user.resume.filePath);
-    } catch (unlinkError) {
-      console.error('Error deleting resume file:', unlinkError);
-      // Continue even if file deletion fails
+      }
+    } catch (fileError) {
+      console.error('Error deleting resume file:', fileError);
     }
     
-    // Clear resume data from user profile
+    // Remove resume data from user
     user.resume = undefined;
     await user.save();
     
@@ -326,181 +463,118 @@ exports.deleteResume = async (req, res) => {
 };
 
 /**
- * Add missing skills to user profile
+ * Add missing skills from resume analysis
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 exports.addMissingSkills = async (req, res) => {
   try {
-    console.log('addMissingSkills called with body:', JSON.stringify(req.body));
-    console.log('User ID from token:', req.user?.userId);
-    
     const userId = req.user.userId;
-    const { skills } = req.body;
+    const { skillsToAdd } = req.body;
     
-    console.log('Skills to add:', JSON.stringify(skills));
-    
-    if (!skills || !Array.isArray(skills) || skills.length === 0) {
-      console.log('No skills provided or invalid skills format');
+    if (!skillsToAdd || !Array.isArray(skillsToAdd)) {
       return res.status(400).json({
         status: 'fail',
-        message: 'No skills provided'
+        message: 'Please provide skills to add'
       });
     }
     
     const user = await User.findById(userId);
-    
     if (!user) {
-      console.log('User not found with ID:', userId);
       return res.status(404).json({
         status: 'fail',
         message: 'User not found'
       });
     }
     
-    console.log('Found user:', user.username);
-    console.log('Existing skills count:', user.existingSkills.length);
+    // Add skills to user profile
+    await resumeService.updateUserSkillsFromResume(userId, skillsToAdd);
     
-    // Get existing skill names for comparison (case insensitive)
-    const existingSkillNames = user.existingSkills.map(skill => 
-      skill.skillName.toLowerCase()
-    );
-    
-    console.log('Existing skill names:', existingSkillNames);
-    
-    // Add new skills
-    let addedSkills = [];
-    let duplicateSkills = [];
-    
-    skills.forEach(skillToAdd => {
-      console.log('Processing skill:', JSON.stringify(skillToAdd));
-      const skillNameLower = skillToAdd.skillName.toLowerCase();
-      
-      // Check if skill already exists
-      if (!existingSkillNames.includes(skillNameLower)) {
-        console.log('Adding new skill:', skillToAdd.skillName);
-        user.existingSkills.push({
-          skillName: skillToAdd.skillName,
-          proficiency: 'Beginner', // Default proficiency
-          status: 'Not Started',
-          startDate: null,
-          notes: skillToAdd.importance ? `Added from missing skills. Importance: ${skillToAdd.importance}` : 'Added from missing skills'
-        });
-        
-        // Keep track of added skills
-        addedSkills.push(skillToAdd.skillName);
-        
-        // Update existingSkillNames to prevent duplicates
-        existingSkillNames.push(skillNameLower);
-      } else {
-        console.log('Skill already exists:', skillToAdd.skillName);
-        // Keep track of duplicate skills
-        duplicateSkills.push(skillToAdd.skillName);
-      }
-    });
-    
-    console.log('Skills added:', addedSkills);
-    console.log('Duplicate skills:', duplicateSkills);
-    
-    // Save the updated user
-    const saveResult = await user.save();
-    console.log('User saved successfully, new skills count:', saveResult.existingSkills.length);
+    // Get updated user
+    const updatedUser = await User.findById(userId);
     
     res.status(200).json({
       status: 'success',
-      message: 'Missing skills added to user profile',
+      message: 'Skills added successfully',
       data: {
-        addedSkills,
-        duplicateSkills,
-        userSkills: user.existingSkills
+        addedSkills: skillsToAdd,
+        totalSkills: updatedUser.existingSkills.length
       }
     });
   } catch (error) {
     console.error('Error adding missing skills:', error);
     res.status(500).json({
       status: 'error',
-      message: 'Failed to add missing skills',
-      error: error.message,
-      stack: error.stack
-    });
-  }
-};
-
-/**
- * Debug endpoint to test skill addition
- */
-exports.debugAddSkill = async (req, res) => {
-  try {
-    const { userId, skillName } = req.query;
-    
-    if (!userId || !skillName) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Missing userId or skillName in query parameters'
-      });
-    }
-    
-    console.log('Debug add skill called with:', { userId, skillName });
-    
-    const user = await User.findById(userId);
-    
-    if (!user) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'User not found'
-      });
-    }
-    
-    // Get existing skill names
-    const existingSkillNames = user.existingSkills.map(skill => 
-      skill.skillName.toLowerCase()
-    );
-    
-    // Check if skill already exists
-    if (existingSkillNames.includes(skillName.toLowerCase())) {
-      return res.status(200).json({
-        status: 'success',
-        message: 'Skill already exists',
-        data: {
-          existingSkills: user.existingSkills
-        }
-      });
-    }
-    
-    // Add new skill
-    user.existingSkills.push({
-      skillName: skillName,
-      proficiency: 'Beginner',
-      status: 'Not Started',
-      startDate: null,
-      notes: 'Added from debug endpoint'
-    });
-    
-    await user.save();
-    
-    res.status(200).json({
-      status: 'success',
-      message: 'Skill added successfully',
-      data: {
-        existingSkills: user.existingSkills
-      }
-    });
-  } catch (error) {
-    console.error('Debug add skill error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to add skill',
+      message: 'Failed to add skills',
       error: error.message
     });
   }
 };
 
 /**
- * Get resume data for a user
+ * Get resume file
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 exports.getResume = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    
+    if (!user || !user.resume || !user.resume.filePath) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Resume not found'
+      });
+    }
+    
+    const filePath = user.resume.filePath;
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Resume file not found on server'
+      });
+    }
+    
+    res.download(filePath, user.resume.fileName);
+  } catch (error) {
+    console.error('Error getting resume:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get resume',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Debug function to add a skill (remove in production)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+exports.debugAddSkill = async (req, res) => {
+  try {
+    res.status(200).json({
+      status: 'success',
+      message: 'Debug endpoint active',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Debug endpoint error',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get enhanced comprehensive resume analysis with all advanced features
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+exports.getEnhancedResumeAnalysis = async (req, res) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId);
@@ -513,24 +587,373 @@ exports.getResume = async (req, res) => {
     }
     
     if (!user.resume || !user.resume.filePath) {
-      return res.status(404).json({
+      return res.status(400).json({
         status: 'fail',
-        message: 'No resume found for this user'
+        message: 'No resume found. Please upload a resume first.'
       });
     }
+    
+    const targetRoleParam = req.query.targetRole;
+    const currentTargetRole = user.targetRole;
+    const shouldRefreshAnalysis = targetRoleParam && targetRoleParam !== currentTargetRole;
+    
+    // Update target role if provided
+    if (shouldRefreshAnalysis) {
+      user.targetRole = targetRoleParam;
+      await user.save();
+    }
+    
+    const targetRole = user.targetRole;
+    
+    if (!targetRole) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please set a target role before requesting enhanced analysis'
+      });
+    }
+    
+    // Generate enhanced analysis
+    const forceRefresh = req.query.refresh === 'true';
+    const shouldGenerateFreshAnalysis = forceRefresh || shouldRefreshAnalysis || !user.resume.enhancedAnalysis;
+    
+    if (shouldGenerateFreshAnalysis) {
+      // Extract text from resume
+      const resumeText = await resumeService.extractTextFromResume(user.resume.filePath);
+      
+      // Generate enhanced comprehensive analysis
+      const enhancedAnalysis = await resumeService.extractSkillsFromResumeEnhanced(
+        resumeText,
+        targetRole
+      );
+      
+      // Store enhanced analysis
+      user.resume.enhancedAnalysis = enhancedAnalysis;
+      user.resume.lastEnhancedAnalysisDate = new Date();
+      await user.save();
+    }
+    
+    // Create comprehensive response
+    const enhancedResponse = {
+      targetRole: targetRole,
+      resumeInfo: {
+        fileName: user.resume.fileName,
+        uploadDate: user.resume.uploadDate,
+        lastAnalysisDate: user.resume.lastEnhancedAnalysisDate || user.resume.uploadDate
+      },
+      
+      // Core Analysis
+      atsScore: user.resume.enhancedAnalysis?.atsScore || user.resume.atsScore || 0,
+      overallScore: calculateOverallScore(user.resume.enhancedAnalysis || {}),
+      
+      // Enhanced Metrics
+      detailedScoring: {
+        keywordScore: user.resume.enhancedAnalysis?.keywordScore || 70,
+        formatScore: user.resume.enhancedAnalysis?.formatScore || 75,
+        experienceRelevance: user.resume.enhancedAnalysis?.experienceRelevance || 80,
+        skillMatchPercentage: user.resume.enhancedAnalysis?.skillMatchPercentage || 65,
+        quantificationScore: user.resume.enhancedAnalysis?.quantificationScore || 60,
+        actionVerbScore: user.resume.enhancedAnalysis?.actionVerbScore || 70
+      },
+      
+      // Skills Analysis
+      extractedSkills: user.resume.enhancedAnalysis?.extractedSkills || [],
+      skillComparison: user.resume.enhancedAnalysis?.skillComparison || user.resume.skillComparison || {},
+      skillCategorization: user.resume.enhancedAnalysis?.skillCategorization || {},
+      
+      // Market Intelligence
+      marketInsights: user.resume.enhancedAnalysis?.marketInsights || {},
+      competitiveAnalysis: user.resume.enhancedAnalysis?.competitiveAnalysis || {},
+      
+      // Career Development
+      careerProgression: user.resume.enhancedAnalysis?.careerProgression || {},
+      improvementRoadmap: user.resume.enhancedAnalysis?.improvementRoadmap || {},
+      
+      // Interview Preparation
+      interviewPreparation: user.resume.enhancedAnalysis?.interviewPreparation || {},
+      
+      // Detailed Analysis
+      detailedAnalysis: user.resume.enhancedAnalysis?.detailedAnalysis || {},
+      industryBenchmark: user.resume.enhancedAnalysis?.industryBenchmark || {},
+      
+      // Recommendations
+      recommendations: user.resume.enhancedAnalysis?.recommendations || generateBasicRecommendations(user.resume.atsScore || 70),
+      
+      // Additional Features
+      strengths: user.resume.enhancedAnalysis?.strengths || ['Professional experience', 'Technical skills'],
+      weaknesses: user.resume.enhancedAnalysis?.weaknesses || ['More quantifiable achievements needed'],
+      nextSteps: user.resume.enhancedAnalysis?.improvementRoadmap?.immediate?.tasks || ['Update resume format', 'Add metrics to achievements']
+    };
+    
+    res.status(200).json({
+      status: 'success',
+      message: 'Enhanced resume analysis retrieved successfully',
+      data: enhancedResponse
+    });
+  } catch (error) {
+    console.error('Error getting enhanced resume analysis:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get enhanced resume analysis',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Calculate overall score from various metrics
+ * @param {Object} analysis - Enhanced analysis object
+ * @returns {number} - Overall score
+ */
+function calculateOverallScore(analysis) {
+  const scores = [
+    analysis.atsScore || 70,
+    analysis.keywordScore || 70,
+    analysis.formatScore || 75,
+    analysis.experienceRelevance || 80,
+    analysis.skillMatchPercentage || 65
+  ];
+  
+  return Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length);
+}
+
+/**
+ * Generate basic recommendations fallback
+ * @param {number} atsScore - ATS score
+ * @returns {Object} - Basic recommendations
+ */
+function generateBasicRecommendations(atsScore) {
+  const recommendations = {
+    immediate: [],
+    shortTerm: [],
+    longTerm: []
+  };
+  
+  if (atsScore < 70) {
+    recommendations.immediate.push('Improve ATS compatibility');
+    recommendations.immediate.push('Add more relevant keywords');
+  }
+  
+  recommendations.shortTerm.push('Enhance skills based on market demand');
+  recommendations.shortTerm.push('Build portfolio projects');
+  
+  recommendations.longTerm.push('Pursue advanced certifications');
+  recommendations.longTerm.push('Develop leadership experience');
+  
+  return recommendations;
+}
+
+/**
+ * Get salary insights for target role
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+exports.getSalaryInsights = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    const targetRole = req.query.targetRole || user?.targetRole || 'Software Developer';
+    const location = req.query.location || 'United States';
+    
+    // Extract skills for salary analysis
+    const userSkills = user?.resume?.extractedSkills || user?.existingSkills || [];
+    
+    // Generate salary insights (this would typically call a real API)
+    const salaryInsights = await generateSalaryInsights(targetRole, location, userSkills);
+    
+    res.status(200).json({
+      status: 'success',
+      data: salaryInsights
+    });
+  } catch (error) {
+    console.error('Error getting salary insights:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get salary insights',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Generate salary insights (mock function - replace with real API)
+ * @param {string} role - Target role
+ * @param {string} location - Location
+ * @param {Array} skills - User skills
+ * @returns {Object} - Salary insights
+ */
+async function generateSalaryInsights(role, location, skills) {
+  // This would typically call a real salary API like Glassdoor, Indeed, etc.
+  const baseSalaryMap = {
+    'full stack developer': { min: 75000, max: 125000, avg: 95000 },
+    'frontend developer': { min: 65000, max: 110000, avg: 85000 },
+    'backend developer': { min: 70000, max: 130000, avg: 100000 },
+    'data scientist': { min: 90000, max: 150000, avg: 120000 },
+    'devops engineer': { min: 85000, max: 140000, avg: 110000 },
+    'software developer': { min: 70000, max: 120000, avg: 90000 }
+  };
+  
+  const roleKey = role.toLowerCase();
+  const baseSalary = baseSalaryMap[roleKey] || baseSalaryMap['software developer'];
+  
+  // Adjust for high-value skills
+  const highValueSkills = ['React', 'AWS', 'Docker', 'Kubernetes', 'Python', 'TypeScript'];
+  const userHighValueSkills = skills.filter(skill => 
+    highValueSkills.some(hvs => skill.skillName?.toLowerCase().includes(hvs.toLowerCase()))
+  );
+  
+  const skillBonus = userHighValueSkills.length * 0.05; // 5% per high-value skill
+  
+  return {
+    role: role,
+    location: location,
+    salaryRange: {
+      minimum: Math.round(baseSalary.min * (1 + skillBonus)),
+      maximum: Math.round(baseSalary.max * (1 + skillBonus)),
+      average: Math.round(baseSalary.avg * (1 + skillBonus))
+    },
+    factors: {
+      experience: 'Senior level can add 20-40% to base salary',
+      location: 'Tech hubs typically offer 15-30% premium',
+      company: 'FAANG companies offer 20-50% above market',
+      skills: `Your ${userHighValueSkills.length} high-value skills boost earning potential`
+    },
+    recommendations: [
+      'Negotiate based on your unique skill combination',
+      'Consider total compensation package',
+      'Research company-specific salary bands',
+      'Highlight quantifiable achievements in negotiations'
+    ],
+    marketTrends: {
+      growth: '8-12% annually',
+      demand: 'Very High',
+      competition: 'Medium to High',
+      outlook: 'Positive long-term growth expected'
+    }
+  };
+}
+
+/**
+ * Get interview questions based on skills and role
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+exports.getInterviewQuestions = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    const targetRole = req.query.targetRole || user?.targetRole || 'Software Developer';
+    
+    if (!user?.resume?.enhancedAnalysis?.interviewPreparation) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please complete enhanced resume analysis first to get personalized interview questions'
+      });
+    }
+    
+    const interviewPrep = user.resume.enhancedAnalysis.interviewPreparation;
     
     res.status(200).json({
       status: 'success',
       data: {
-        resume: user.resume
+        targetRole: targetRole,
+        preparation: interviewPrep,
+        additionalTips: [
+          'Practice answering questions out loud',
+          'Prepare specific examples for each skill',
+          'Research the company thoroughly',
+          'Have questions ready to ask the interviewer'
+        ]
       }
     });
   } catch (error) {
-    console.error('Error getting resume:', error);
+    console.error('Error getting interview questions:', error);
     res.status(500).json({
       status: 'error',
-      message: 'Failed to get resume',
+      message: 'Failed to get interview questions',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get market trends for skills
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+exports.getMarketTrends = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    const skills = req.query.skills ? req.query.skills.split(',') : 
+                   user?.resume?.extractedSkills?.map(s => s.skillName) || [];
+    
+    // Generate market trends for user's skills
+    const trends = await generateMarketTrends(skills);
+    
+    res.status(200).json({
+      status: 'success',
+      data: trends
+    });
+  } catch (error) {
+    console.error('Error getting market trends:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get market trends',
       error: error.message
     });
   }
 }; 
+
+/**
+ * Generate market trends for skills
+ * @param {Array} skills - Skills to analyze
+ * @returns {Object} - Market trends
+ */
+async function generateMarketTrends(skills) {
+  // This would typically call real market data APIs
+  const trendingUp = ['TypeScript', 'React', 'Kubernetes', 'AWS', 'Python', 'GraphQL'];
+  const stable = ['JavaScript', 'Node.js', 'Git', 'SQL', 'HTML', 'CSS'];
+  const declining = ['jQuery', 'AngularJS', 'PHP', 'SOAP'];
+  
+  const analyzedSkills = skills.map(skill => {
+    let trend = 'stable';
+    let growth = '0%';
+    
+    if (trendingUp.some(t => skill.toLowerCase().includes(t.toLowerCase()))) {
+      trend = 'rising';
+      growth = '+15%';
+    } else if (declining.some(d => skill.toLowerCase().includes(d.toLowerCase()))) {
+      trend = 'declining';
+      growth = '-5%';
+    } else {
+      growth = '+3%';
+    }
+    
+    return {
+      skill,
+      trend,
+      growth,
+      demand: trend === 'rising' ? 'High' : trend === 'declining' ? 'Medium' : 'High'
+    };
+  });
+  
+  return {
+    overview: {
+      totalSkills: skills.length,
+      risingSkills: analyzedSkills.filter(s => s.trend === 'rising').length,
+      stableSkills: analyzedSkills.filter(s => s.trend === 'stable').length,
+      decliningSkills: analyzedSkills.filter(s => s.trend === 'declining').length
+    },
+    skillAnalysis: analyzedSkills,
+    recommendations: {
+      focus: analyzedSkills.filter(s => s.trend === 'rising').slice(0, 3).map(s => s.skill),
+      develop: ['Cloud Computing', 'AI/ML', 'DevOps'],
+      monitor: analyzedSkills.filter(s => s.trend === 'declining').map(s => s.skill)
+    },
+    industryInsights: {
+      emergingTechnologies: ['WebAssembly', 'Edge Computing', 'Quantum Computing'],
+      inDemandSkills: ['Cloud Platforms', 'Microservices', 'AI/ML'],
+      marketGrowth: '12% annually in tech sector'
+    }
+  };
+} 

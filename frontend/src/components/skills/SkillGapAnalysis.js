@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import SkillResources from './SkillResources';
 import './SkillGapAnalysis.css';
@@ -43,6 +43,10 @@ const SkillGapAnalysis = () => {
   const [skillsPerPage] = useState(6);
   const [resourceModalOpen, setResourceModalOpen] = useState(false);
   const [selectedSkillForModal, setSelectedSkillForModal] = useState(null);
+  
+  // Ref to track if component is visible
+  const isComponentVisible = useRef(true);
+  const lastRefreshTime = useRef(Date.now());
   
   // Check authentication on mount and when currentUser changes
   useEffect(() => {
@@ -102,6 +106,69 @@ const SkillGapAnalysis = () => {
     }
   }, [api, targetRole]);
 
+  // Auto-refresh functionality - listen for visibility changes and profile updates
+  useEffect(() => {
+    let refreshInterval;
+    
+    // Function to check if we should refresh data
+    const checkAndRefresh = async () => {
+      if (isAuthenticated && isComponentVisible.current) {
+        const now = Date.now();
+        // Refresh if it's been more than 10 seconds since last refresh
+        if (now - lastRefreshTime.current > 10000) {
+          console.log('🔄 Auto-refreshing skill gap data...');
+          await refreshUserProfile();
+          lastRefreshTime.current = now;
+        }
+      }
+    };
+
+    // Listen for visibility changes (when user switches tabs/windows)
+    const handleVisibilityChange = () => {
+      isComponentVisible.current = !document.hidden;
+      if (!document.hidden && isAuthenticated) {
+        console.log('👀 Page became visible, refreshing data...');
+        checkAndRefresh();
+      }
+    };
+
+    // Listen for focus events (when user returns to window)
+    const handleFocus = () => {
+      if (isAuthenticated) {
+        console.log('🎯 Window gained focus, checking for updates...');
+        checkAndRefresh();
+      }
+    };
+
+    // Listen for localStorage changes (when profile is updated in another tab)
+    const handleStorageChange = (e) => {
+      if (e.key === 'profileUpdated' && isAuthenticated) {
+        console.log('📱 Profile updated in another tab, refreshing...');
+        checkAndRefresh();
+        // Remove the flag
+        localStorage.removeItem('profileUpdated');
+      }
+    };
+
+    // Set up event listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Set up interval to check periodically (every 30 seconds)
+    refreshInterval = setInterval(checkAndRefresh, 30000);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorageChange);
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
+  }, [isAuthenticated]);
+
   // Load user data when authenticated
   useEffect(() => {
     if (isAuthenticated && currentUser) {
@@ -118,6 +185,9 @@ const SkillGapAnalysis = () => {
       if (currentUser.targetRole) {
         fetchRecommendedSkills(currentUser.targetRole);
       }
+      
+      // Update last refresh time
+      lastRefreshTime.current = Date.now();
     } else {
       console.log('❌ User not authenticated or no current user');
     }
