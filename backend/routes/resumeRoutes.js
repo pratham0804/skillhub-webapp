@@ -1,15 +1,11 @@
 const express = require('express');
 const resumeController = require('../controllers/resumeController');
 const authMiddleware = require('../middleware/authMiddleware');
-const uploadMiddleware = require('../middleware/uploadMiddleware');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
 const router = express.Router();
-
-// Public debug endpoint (no auth)
-router.get('/debug-add-skill', resumeController.debugAddSkill);
 
 // Apply auth middleware to all routes
 router.use(authMiddleware);
@@ -28,7 +24,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     // Generate unique filename: userId-timestamp-originalname
-    const userId = req.user.userId;
+    const userId = req.user?.userId || 'anonymous';
     const timestamp = Date.now();
     const originalName = file.originalname.replace(/\s+/g, '_');
     
@@ -56,48 +52,30 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB max file size
+    fileSize: 10 * 1024 * 1024 // 10MB max file size
   }
 });
 
-// Upload resume
+// Core resume routes - ONLY FUNCTIONS THAT EXIST
 router.post('/upload', upload.single('resume'), resumeController.uploadResume);
-
-// Get resume analysis
 router.get('/analysis', resumeController.getResumeAnalysis);
-
-// Delete resume
+router.get('/status', resumeController.getResumeStatus);
 router.delete('/', resumeController.deleteResume);
-
-// Add missing skills from resume analysis
-router.post('/add-missing-skills', resumeController.addMissingSkills);
-
-// Get resume
-router.get('/', resumeController.getResume);
-
-// Enhanced Analysis Features
-router.get('/enhanced-analysis', resumeController.getEnhancedResumeAnalysis);
-router.get('/salary-insights', resumeController.getSalaryInsights);
-router.get('/interview-questions', resumeController.getInterviewQuestions);
-router.get('/market-trends', resumeController.getMarketTrends);
-
-// Debug endpoint (remove in production)
-router.get('/debug/add-skill', resumeController.debugAddSkill);
 
 // Error handling middleware for multer
 router.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({
-        status: 'fail',
+        status: 'error',
         message: 'File too large. Maximum size is 10MB.'
       });
     }
   }
   
-  if (error.message.includes('Only')) {
+  if (error.message.includes('Invalid file type')) {
     return res.status(400).json({
-      status: 'fail',
+      status: 'error',
       message: error.message
     });
   }

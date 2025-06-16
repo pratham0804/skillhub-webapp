@@ -102,12 +102,43 @@ const UserSchema = new mongoose.Schema({
     },
     category: {
       type: String,
-      enum: ['Technical', 'Soft Skills', 'Tools', 'Frameworks', 'Languages', 'Methodologies'],
+      enum: [
+        'Technical', 
+        'Soft Skills', 
+        'Tools', 
+        'Frameworks', 
+        'Languages', 
+        'Methodologies',
+        'Frontend Frameworks',
+        'Backend Technologies',
+        'DevOps Tools',
+        'Domain Knowledge',
+        'Programming Languages',
+        'Databases',
+        'Cloud Services',
+        'Testing',
+        'Mobile Development',
+        'Web Development',
+        'Data Science',
+        'Machine Learning',
+        'Security',
+        'Project Management'
+      ],
       default: 'Technical'
     },
     status: {
       type: String,
-      enum: ['Not Started', 'Learning', 'Practicing', 'Proficient', 'Mastered'],
+      enum: [
+        'Not Started', 
+        'Learning', 
+        'Practicing', 
+        'Proficient', 
+        'Mastered',
+        'In Progress',
+        'Completed',
+        'Active',
+        'Inactive'
+      ],
       default: 'Not Started'
     },
     startDate: Date,

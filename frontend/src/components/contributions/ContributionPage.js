@@ -360,13 +360,13 @@ const ContributionPage = () => {
                 </Box>
 
                 {/* Right Content - Simple Image */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'center',
-                  position: 'relative'
-                }}>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}>
                   <img
-                    src={contributionImage}
+                      src={contributionImage}
                     alt="Community Contribution"
                     style={{
                       width: '100%',
@@ -374,9 +374,9 @@ const ContributionPage = () => {
                       height: 'auto',
                       borderRadius: '16px',
                       boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
-                    }}
-                  />
-                </Box>
+                      }}
+                    />
+                  </Box>
               </Box>
             </Container>
           </HeroContainer>
@@ -417,13 +417,13 @@ const ContributionPage = () => {
 
             {/* Tab Content */}
             <Box sx={{ mt: 4 }}>
-              <div>
-                {activeTab === 0 ? (
-                  <SkillContributionForm />
-                ) : (
-                  <ToolContributionForm />
-                )}
-              </div>
+                <div>
+                  {activeTab === 0 ? (
+                    <SkillContributionForm />
+                  ) : (
+                    <ToolContributionForm />
+                  )}
+                </div>
             </Box>
           </Paper>
         </Container>

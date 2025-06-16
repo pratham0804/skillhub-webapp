@@ -310,7 +310,7 @@ const Home = () => {
           </div>
       </div>
       
-                <div className="process-step-card">
+        <div className="process-step-card">
           <div className="step-icon-modern">📈</div>
           <div className="step-header">
             <div className="step-number-modern">3</div>
@@ -331,7 +331,7 @@ const Home = () => {
               <a href="/data-dashboard" className="step-link">View Market Trends</a>
             </div>
           </div>
-        </div>
+      </div>
       
         <div className="process-step-card">
           <div className="step-icon-modern">🎯</div>

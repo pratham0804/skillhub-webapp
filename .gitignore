@@ -130,9 +130,9 @@ dist/
 *.sqlite
 *.db
 
-# Uploads
-uploads/*
-!uploads/.gitkeep
+# Uploads (keep upload directories but ignore content)
+backend/uploads/*
+!backend/uploads/.gitkeep
 
 # Production files
 *.min.js
@@ -184,21 +184,5 @@ service-account.json
 # API Keys file
 api-keys.json
 
-# ===== RESUME FEATURE - DO NOT COMMIT =====
-# Resume page only (keeping resume upload feature in profile)
-frontend/src/pages/ResumePage.js
-frontend/src/pages/ResumePage.css
-
-# Resume uploads and temp files
-backend/uploads/
-backend/temp/
-
 # Temporary development files
-temp-profile-repo/
-*.pdf
-*.doc
-*.docx
-
-# Resume analysis and AI features
-**/ResumeAnalysis*
-**/resume-analysis* 
+temp-profile-repo/ 
