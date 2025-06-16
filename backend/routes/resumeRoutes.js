@@ -63,7 +63,8 @@ const upload = multer({
 // Upload resume
 router.post('/upload', upload.single('resume'), resumeController.uploadResume);
 
-// Note: Resume analysis route removed - keeping only basic upload/download functionality
+// Get resume analysis
+router.get('/analysis', resumeController.getResumeAnalysis);
 
 // Delete resume
 router.delete('/', resumeController.deleteResume);
