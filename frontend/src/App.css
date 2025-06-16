@@ -567,16 +567,21 @@
   z-index: 2;
 }
 
+.section-header .section-badge {
+  margin-bottom: 1.2rem;
+  order: 1;
+}
+
 .section-header h2 {
-  font-size: 3.2rem;
+  font-size: 2.4rem;
   margin-bottom: 1.5rem;
-  font-weight: 800;
-  color: #1f2937;
-  line-height: 1.2;
-  background: linear-gradient(135deg, #1f2937 0%, #4f46e5 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  order: 2;
+}
+
+.section-header .subtitle {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  order: 3;
 }
 
 .subtitle {
@@ -784,13 +789,13 @@
   }
 
   .how-it-works-section .section-badge {
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
     order: 1;
   }
 
   .how-it-works-section h2 {
     order: 2;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .how-it-works-section .subtitle {
@@ -890,6 +895,15 @@
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(59, 130, 246, 0.1));
   border: 1px solid rgba(34, 197, 94, 0.2);
   color: #059669;
+  margin-bottom: 1.5rem;
+}
+
+.how-it-works-section h2 {
+  margin-bottom: 2rem;
+}
+
+.how-it-works-section .subtitle {
+  margin-top: 0;
 }
 
 /* New Process Container */
@@ -4371,9 +4385,14 @@
     margin-bottom: 2rem;
   }
 
+  .section-header .section-badge {
+    margin-bottom: 1rem;
+  }
+
   .section-header h2 {
     font-size: 2rem;
     line-height: 1.2;
+    margin-bottom: 1.2rem;
   }
 
   .section-header .subtitle {
@@ -4395,9 +4414,14 @@
     padding: 0 0.5rem;
   }
 
+  .how-it-works-section .section-badge {
+    margin-bottom: 1rem;
+  }
+
   .how-it-works-section h2 {
     font-size: 2rem;
     line-height: 1.2;
+    margin-bottom: 1.2rem;
   }
 
   .how-it-works-section .subtitle {
