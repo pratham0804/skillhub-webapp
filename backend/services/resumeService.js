@@ -1925,7 +1925,7 @@ const generateFallbackMissingSkills = (extractedSkills, targetRole) => {
     }
   });
   
-  return {
+    return {
     missingSkills: commonMissingSkills,
     skillGaps: [
       {
