@@ -168,7 +168,7 @@ const skillBasedCourses = {
       author: 'Oracle',
       description: 'Official Java documentation with tutorials, API references, and best practices.',
       type: 'documentation',
-      source: 'documentation',
+      source: 'Documentation',
       qualityScore: 19,
       qualityIndicator: 'Highly Recommended'
     }
@@ -181,7 +181,7 @@ const skillBasedCourses = {
       author: 'freeCodeCamp',
       description: 'Learn JavaScript from scratch in this 3-hour comprehensive course.',
       type: 'video',
-      source: 'youtube',
+      source: 'YouTube',
       qualityScore: 18,
       qualityIndicator: 'Highly Recommended',
       formattedViews: '2.1M',
@@ -195,7 +195,7 @@ const skillBasedCourses = {
       author: 'Programming with Mosh',
       description: 'JavaScript basics for beginners: learn JavaScript fundamentals in 1 hour.',
       type: 'video',
-      source: 'youtube',
+      source: 'YouTube',
       qualityScore: 16,
       qualityIndicator: 'Recommended',
       formattedViews: '3.5M',
@@ -209,7 +209,7 @@ const skillBasedCourses = {
       author: 'MDN Web Docs',
       description: 'Official JavaScript documentation with guides, references, and examples.',
       type: 'documentation',
-      source: 'documentation',
+      source: 'Documentation',
       qualityScore: 19,
       qualityIndicator: 'Highly Recommended'
     }
@@ -250,7 +250,7 @@ const skillBasedCourses = {
       author: 'React Team',
       description: 'Official React documentation with guides, API references, and examples.',
       type: 'documentation',
-      source: 'documentation',
+      source: 'Documentation',
       qualityScore: 19,
       qualityIndicator: 'Highly Recommended'
     }
@@ -563,7 +563,7 @@ const fetchFromYouTubeAPI = async (query, isPrimaryQuery = true) => {
       commentCount: parseInt(item.statistics.commentCount || '0', 10),
       publishedAt: item.snippet.publishedAt,
       type: 'video',
-      source: 'youtube',
+      source: 'YouTube',
       // Add metadata for filtering
       isTutorial: isTutorialVideo(item.snippet.title, item.snippet.description),
       isComprehensive: isComprehensiveVideo(item.snippet.title, item.snippet.description),
@@ -963,11 +963,11 @@ const labelResourcesBySource = (resources) => {
     
     // Otherwise determine source based on URL or other properties
     if (resource.url && resource.url.includes('youtube.com')) {
-      return { ...resource, source: 'youtube' };
+      return { ...resource, source: 'YouTube' };
     } else if (resource.url && resource.url.includes('coursera.org')) {
-      return { ...resource, source: 'coursera' };
+      return { ...resource, source: 'Coursera' };
     } else if (resource.type === 'documentation') {
-      return { ...resource, source: 'documentation' };
+      return { ...resource, source: 'Documentation' };
     } else {
       return { ...resource, source: 'web' };
     }

@@ -147,8 +147,8 @@ const SkillResources = ({ skillName, isVisible = true, onToggle = () => {} }) =>
   };
 
   const renderResource = (resource, index) => {
-    const isYouTube = resource.source === 'YouTube' || resource.platform === 'YouTube';
-    const isCoursera = resource.source === 'Coursera' || resource.platform === 'Coursera';
+    const isYouTube = resource.source === 'YouTube' || resource.source === 'youtube' || resource.platform === 'YouTube';
+    const isCoursera = resource.source === 'Coursera' || resource.source === 'coursera' || resource.platform === 'Coursera';
     const url = getResourceUrl(resource);
     const hasUrl = !!url;
 
