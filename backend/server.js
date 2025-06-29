@@ -76,9 +76,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Optimize mongoose settings for better performance
-mongoose.set('bufferCommands', false); // Disable mongoose buffering
-mongoose.set('bufferMaxEntries', 0); // Disable mongoose buffering
+// Optimize mongoose settings for better performance (compatible with newer versions)
+mongoose.set('bufferCommands', false); // Disable mongoose buffering for faster errors
 
 // MongoDB Connection with optimized settings for fast authentication
 mongoose.connect(process.env.MONGODB_URI, {
