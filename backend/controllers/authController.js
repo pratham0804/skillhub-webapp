@@ -2,14 +2,14 @@ const User = require('../models/User');
 const { firebase } = require('../config/firebase');
 const jwt = require('jsonwebtoken');
 
-// Register a new user
+// Register a new user - Optimized for speed
 exports.register = async (req, res) => {
   try {
     const { email, password, username } = req.body;
     
-    // Check if username exists
+    // Check if username exists with optimized query (only select _id)
     let finalUsername = username;
-    const existingUserWithUsername = await User.findOne({ username: finalUsername });
+    const existingUserWithUsername = await User.findOne({ username: finalUsername }).select('_id');
     
     // If username already exists, append a random string
     if (existingUserWithUsername) {
@@ -57,7 +57,7 @@ exports.register = async (req, res) => {
   }
 };
 
-// Login user
+// Login user - Optimized for speed
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -66,8 +66,8 @@ exports.login = async (req, res) => {
     const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
     const firebaseUid = userCredential.user.uid;
     
-    // Find user in MongoDB
-    const user = await User.findOne({ firebaseUid });
+    // Find user in MongoDB with optimized query (only select necessary fields)
+    const user = await User.findOne({ firebaseUid }).select('_id email username createdAt');
     
     if (!user) {
       return res.status(404).json({
@@ -101,7 +101,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// Google login
+// Google login - Optimized for faster MongoDB operations
 exports.googleLogin = async (req, res) => {
   try {
     console.log('Google login request received:', req.body);
@@ -117,53 +117,97 @@ exports.googleLogin = async (req, res) => {
       });
     }
     
-    // Check if user exists in MongoDB
-    let user = await User.findOne({ firebaseUid });
+    // Use findOneAndUpdate with upsert for atomic operation - much faster than separate find + create
+    let finalUsername = username || email.split('@')[0];
     
-    // If user doesn't exist, create new user
-    if (!user) {
-      // Check if username exists
-      let finalUsername = username || email.split('@')[0];
-      const existingUserWithUsername = await User.findOne({ username: finalUsername });
-      
-      // If username already exists, append a random string
-      if (existingUserWithUsername) {
-        const randomString = Math.random().toString(36).substring(2, 7);
-        finalUsername = `${finalUsername}_${randomString}`;
+    // First try to find/create user atomically
+    let user = await User.findOneAndUpdate(
+      { firebaseUid }, // Find by firebaseUid
+      {
+        $setOnInsert: { // Only set these fields if creating new document
+          email,
+          username: finalUsername,
+          existingSkills: [],
+          targetRole: '',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      },
+      { 
+        upsert: true, // Create if doesn't exist
+        new: true, // Return the updated document
+        runValidators: true // Ensure schema validation
       }
-      
-      user = new User({
-        firebaseUid,
-        email,
+    );
+    
+    // If user was just created and username conflicts, handle it
+    if (user.username !== finalUsername) {
+      // Username conflict occurred during creation, need to fix it
+      const existingUserWithUsername = await User.findOne({ 
         username: finalUsername,
-        existingSkills: [],
-        targetRole: ''
-      });
+        _id: { $ne: user._id } // Exclude current user
+      }).select('_id'); // Only select _id for faster query
       
-      await user.save();
+      if (existingUserWithUsername) {
+        // Generate unique username
+        const randomString = Math.random().toString(36).substring(2, 7);
+        const newUsername = `${finalUsername}_${randomString}`;
+        
+        // Update with unique username
+        user = await User.findByIdAndUpdate(
+          user._id,
+          { 
+            username: newUsername,
+            updatedAt: new Date()
+          },
+          { new: true }
+        );
+      }
     }
     
-    // Generate JWT token
+    // Generate JWT token with optimized payload
     const token = jwt.sign(
-      { userId: user._id, email },
+      { 
+        userId: user._id, 
+        email: user.email,
+        iat: Math.floor(Date.now() / 1000) // Current timestamp
+      },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
     
+    // Send optimized response
     res.status(200).json({
       status: 'success',
       token,
       user: {
         id: user._id,
         email: user.email,
-        username: user.username
+        username: user.username,
+        createdAt: user.createdAt,
+        isNew: user.createdAt.getTime() > (Date.now() - 5000) // User created in last 5 seconds
       }
     });
+    
+    console.log(`Google login successful for user: ${user.email} (${user.isNew ? 'NEW' : 'EXISTING'})`);
+    
   } catch (error) {
     console.error('Google login error:', error);
+    
+    // Enhanced error handling
+    let errorMessage = 'Authentication failed';
+    if (error.code === 11000) { // MongoDB duplicate key error
+      errorMessage = 'Account with this email already exists';
+    } else if (error.name === 'ValidationError') {
+      errorMessage = 'Invalid user data provided';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
     res.status(400).json({
       status: 'fail',
-      message: error.message
+      message: errorMessage,
+      ...(process.env.NODE_ENV === 'development' && { debug: error.stack })
     });
   }
 }; 

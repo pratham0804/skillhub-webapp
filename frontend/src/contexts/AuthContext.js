@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
         'Content-Type': 'application/json'
       },
       withCredentials: true,
-      timeout: 30000 // 30 second timeout (increased for file operations)
+      timeout: 45000 // 45 second timeout (optimized for all operations)
     });
 
     // Add response interceptor for error handling
@@ -138,38 +138,76 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async () => {
     try {
       setError(null);
+      setLoading(true); // Set loading state for better UX
+      
       const provider = new firebase.auth.GoogleAuthProvider();
       // Force account selection even if user is already signed in
-      provider.setCustomParameters({ prompt: 'select_account' });
+      provider.setCustomParameters({ 
+        prompt: 'select_account',
+        max_age: 0 // Force fresh authentication
+      });
       
-      // Sign in with Firebase
-      const result = await firebase.auth().signInWithPopup(provider);
+      // Set a longer timeout for Firebase auth popup (60 seconds)
+      const authPromise = firebase.auth().signInWithPopup(provider);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Authentication timeout - Please try again')), 60000)
+      );
+      
+      // Race between auth and timeout
+      const result = await Promise.race([authPromise, timeoutPromise]);
       
       // Get the user from the result
       const { user } = result;
       const email = user.email;
       const username = user.displayName || email.split('@')[0];
       
-      // We don't need to send the idToken to our backend anymore
-      // const idToken = await user.getIdToken();
+      // Create our own JWT token via the server with increased timeout
+      const apiConfig = {
+        timeout: 60000, // 60 second timeout for this specific request
+        validateStatus: function (status) {
+          return status < 500; // Resolve for status codes less than 500
+        },
+        // Add retry logic for network issues
+        retry: 2,
+        retryDelay: 1000
+      };
       
-      // Create our own JWT token via the server (don't send the Google token)
       const response = await api.post('/auth/google-login', {
         email: email,
         username: username,
         firebaseUid: user.uid
-      });
+      }, apiConfig);
       
-      if (response.data.token) {
+      if (response.data && response.data.token) {
         setToken(response.data.token);
         setCurrentUser(response.data.user);
         localStorage.setItem('token', response.data.token);
+        setLoading(false); // Clear loading state on success
+        
+        // Log successful authentication
+        console.log(`Google authentication successful for: ${response.data.user.email}`);
         return response.data;
+      } else {
+        throw new Error('Invalid response from server');
       }
     } catch (error) {
+      setLoading(false); // Clear loading state on error
       console.error('Google login error:', error);
-      setError('Google login failed: ' + (error.message || ''));
-      throw error;
+      
+      // Provide specific error messages
+      let errorMessage = 'Google login failed';
+      if (error.message.includes('timeout')) {
+        errorMessage = 'Login is taking longer than expected. Please check your internet connection and try again.';
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Login was cancelled. Please try again.';
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'Pop-up was blocked by your browser. Please allow pop-ups and try again.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
+      throw new Error(errorMessage);
     }
   };
 

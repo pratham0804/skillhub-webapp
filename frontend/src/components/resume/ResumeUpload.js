@@ -11,8 +11,15 @@ const ResumeUpload = () => {
   const [success, setSuccess] = useState(false);
   const [resumeData, setResumeData] = useState(null);
 
-  // Fetch resume data on component mount
+  // Clear resume data on component mount to ensure fresh state
   useEffect(() => {
+    // Reset all state when component mounts
+    setResumeData(null);
+    setFile(null);
+    setFileName('');
+    setError(null);
+    setSuccess(false);
+    
     const fetchResumeData = async () => {
       try {
         const response = await api.get('/resume');

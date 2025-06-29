@@ -23,6 +23,10 @@ const Login = () => {
     const requiredFields = ['username', 'targetRole', 'location', 'experience', 'bio'];
     return requiredFields.every(field => user[field] && user[field].trim() !== '');
   };
+
+  const isMobileView = () => {
+    return window.innerWidth <= 768;
+  };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,12 +37,12 @@ const Login = () => {
       const response = await login(email, password);
       const user = response.user;
       
-      // Check if profile is complete
-      if (!checkProfileCompletion(user)) {
-        // First time user or incomplete profile
-        navigate('/profile', { state: { isFirstTime: true } });
+      // Check if profile is complete or mobile view
+      if (!checkProfileCompletion(user) || isMobileView()) {
+        // First time user, incomplete profile, or mobile user
+        navigate('/profile', { state: { isFirstTime: !checkProfileCompletion(user) } });
       } else {
-        // Returning user with complete profile
+        // Returning user with complete profile on desktop
         navigate('/');
       }
     } catch (err) {
@@ -57,12 +61,12 @@ const Login = () => {
       const response = await loginWithGoogle();
       const user = response.user;
       
-      // Check if profile is complete
-      if (!checkProfileCompletion(user)) {
-        // First time user or incomplete profile
-        navigate('/profile', { state: { isFirstTime: true } });
+      // Check if profile is complete or mobile view
+      if (!checkProfileCompletion(user) || isMobileView()) {
+        // First time user, incomplete profile, or mobile user
+        navigate('/profile', { state: { isFirstTime: !checkProfileCompletion(user) } });
       } else {
-        // Returning user with complete profile
+        // Returning user with complete profile on desktop
         navigate('/');
       }
     } catch (err) {

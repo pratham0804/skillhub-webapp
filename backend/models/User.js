@@ -206,4 +206,16 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
+// Optimize database performance with strategic indexes
+UserSchema.index({ firebaseUid: 1 }, { unique: true }); // Primary lookup field
+UserSchema.index({ email: 1 }, { unique: true }); // Email lookup
+UserSchema.index({ username: 1 }); // Username lookup for duplicates
+UserSchema.index({ createdAt: -1 }); // For recent users queries
+UserSchema.index({ 'existingSkills.skillName': 1 }); // For skill searches
+UserSchema.index({ targetRole: 1 }); // For role-based searches
+
+// Compound indexes for common queries
+UserSchema.index({ firebaseUid: 1, email: 1 }); // Google login optimization
+UserSchema.index({ username: 1, createdAt: -1 }); // Username with timestamp
+
 module.exports = mongoose.model('User', UserSchema); 

@@ -11,6 +11,11 @@ const courseraService = require('./courseraService');
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
 const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3';
 
+// Debug YouTube API key (silent in production)
+if (process.env.NODE_ENV === 'development') {
+  console.log('YouTube API Key configured:', !!YOUTUBE_API_KEY);
+}
+
 // Mock data for development (in a real app, these would come from a database or API)
 const roleBasedCourses = {
   'Frontend Developer': [
@@ -519,10 +524,13 @@ const skillBasedCourses = {
  */
 const fetchFromYouTubeAPI = async (query, isPrimaryQuery = true) => {
   if (!YOUTUBE_API_KEY) {
+    console.warn('YouTube API key is not configured');
     throw new Error('YouTube API key is not configured');
   }
   
   try {
+    console.log(`Making YouTube API call for query: "${query}"`);
+    
     // First fetch search results
     const response = await axios.get(`${YOUTUBE_API_URL}/search`, {
       params: {
@@ -530,16 +538,19 @@ const fetchFromYouTubeAPI = async (query, isPrimaryQuery = true) => {
         maxResults: 15, // Fetch more results to filter for the best ones
         q: query,
         type: 'video',
-        videoCategoryId: '27', // Education category
         relevanceLanguage: 'en',
         key: YOUTUBE_API_KEY,
         // Balance between relevance and popularity
         order: isPrimaryQuery ? 'relevance' : 'viewCount'
-      }
+      },
+      timeout: 10000 // 10 second timeout
     });
+    
+    console.log(`YouTube API search response received: ${response.data.items?.length || 0} results`);
 
     // Extract video IDs
     const videoIds = response.data.items.map(item => item.id.videoId);
+    console.log(`Fetching details for ${videoIds.length} videos`);
     
     // Get detailed information about videos including statistics
     const videoDetailsResponse = await axios.get(`${YOUTUBE_API_URL}/videos`, {
@@ -547,8 +558,11 @@ const fetchFromYouTubeAPI = async (query, isPrimaryQuery = true) => {
         part: 'contentDetails,statistics,snippet',
         id: videoIds.join(','),
         key: YOUTUBE_API_KEY
-      }
+      },
+      timeout: 10000 // 10 second timeout
     });
+    
+    console.log(`YouTube API video details response received: ${videoDetailsResponse.data.items?.length || 0} videos`);
 
     // Format and enhance results with statistics
     const results = videoDetailsResponse.data.items.map(item => ({
@@ -629,9 +643,12 @@ const fetchFromYouTubeAPI = async (query, isPrimaryQuery = true) => {
     filteredResults.sort((a, b) => b.qualityScore - a.qualityScore);
 
     // Return top 5 results
-    return filteredResults.slice(0, 5);
+    const finalResults = filteredResults.slice(0, 5);
+    console.log(`Returning ${finalResults.length} filtered YouTube results`);
+    return finalResults;
   } catch (error) {
-    console.error('Error fetching from YouTube API:', error);
+    console.error('Error fetching from YouTube API:', error.response?.data || error.message);
+    // Return empty array on error so fallback can be used
     return [];
   }
 };
@@ -809,13 +826,19 @@ const getRecommendationsForRole = async (targetRole) => {
       return labelResourcesBySource(recommendations);
     }
     
-    // If we don't have any recommendations, return empty array
-    return [];
+    // If we don't have any recommendations, use role-based fallback
+    console.log(`No API results found for role: ${targetRole}, using role-based fallback resources`);
+    const fallbackRoleResources = roleBasedCourses[targetRole] || 
+      getFallbackResources(`${targetRole} career path`, 5);
+    return fallbackRoleResources;
     
   } catch (error) {
     console.error('Error getting role recommendations:', error);
-    // Return empty array instead of fallback
-    return [];
+    // Return role-based fallback resources when there's an error
+    console.log(`Error occurred for role: ${targetRole}, using fallback resources`);
+    const fallbackRoleResources = roleBasedCourses[targetRole] || 
+      getFallbackResources(`${targetRole} career path`, 5);
+    return fallbackRoleResources;
   }
 };
 
@@ -866,47 +889,78 @@ const getRecommendationsForSkill = async (skillName) => {
       ];
     }
     
-    // Try to get YouTube recommendations
-    try {
-      // Try to get real recommendations from YouTube API
-      if (YOUTUBE_API_KEY) {
-        // Try each query in the queryAttempts array
-        for (const query of queryAttempts) {
-          const apiResults = await fetchFromYouTubeAPI(query, true);
-          if (apiResults && apiResults.length > 0) {
-            // Filter for relevance and add them to recommendations
-            const relevantResults = apiResults.filter(resource => {
-              const title = (resource.title || '').toLowerCase();
-              const description = (resource.description || '').toLowerCase();
-              const content = title + ' ' + description;
-              
-              // Special handling for REST APIs
-              if (isRestApi) {
-                return content.includes('rest') && content.includes('api');
-              }
-              
-              // For compound skills, require all significant keywords to be present
-              if (isCompoundSkill) {
-                return skillKeywords.every(keyword => content.includes(keyword));
-              }
-              
-              // For single keyword skills, just check if one keyword is included
-              return skillKeywords.some(keyword => content.includes(keyword));
-            });
+    // Try to get YouTube recommendations first, then fallback to curated resources
+  try {
+    // Try to get real recommendations from YouTube API
+    if (YOUTUBE_API_KEY) {
+      console.log(`Attempting YouTube API calls for skill: ${skillName}`);
+      
+      // Try each query in the queryAttempts array
+      for (const query of queryAttempts) {
+        console.log(`Trying YouTube query: "${query}"`);
+        const apiResults = await fetchFromYouTubeAPI(query, true);
+        
+        if (apiResults && apiResults.length > 0) {
+          console.log(`YouTube API returned ${apiResults.length} results for "${query}"`);
+          
+          // Filter for relevance and add them to recommendations
+          const relevantResults = apiResults.filter(resource => {
+            const title = (resource.title || '').toLowerCase();
+            const description = (resource.description || '').toLowerCase();
+            const content = title + ' ' + description;
             
-            if (relevantResults.length > 0) {
-              recommendations = recommendations.concat(
-                enhanceResourcesWithFormattedStats(relevantResults)
-              );
-              break;
+            // Special handling for REST APIs
+            if (isRestApi) {
+              return content.includes('rest') && content.includes('api');
             }
+            
+            // For compound skills, require all significant keywords to be present
+            if (isCompoundSkill) {
+              return skillKeywords.every(keyword => content.includes(keyword));
+            }
+            
+            // For single keyword skills, just check if one keyword is included
+            return skillKeywords.some(keyword => content.includes(keyword));
+          });
+          
+          if (relevantResults.length > 0) {
+            console.log(`Found ${relevantResults.length} relevant results from YouTube`);
+            recommendations = recommendations.concat(
+              enhanceResourcesWithFormattedStats(relevantResults)
+            );
+            break; // Stop on first successful query
+          } else {
+            console.log(`No relevant results found for "${query}", trying next query...`);
           }
+        } else {
+          console.log(`No results from YouTube API for "${query}"`);
         }
       }
-    } catch (youtubeError) {
-      console.error('Error fetching YouTube recommendations:', youtubeError);
-      // Continue to try other sources
+      
+      // If no YouTube results found, use fallback resources
+      if (recommendations.length === 0) {
+        console.log('No YouTube results found, using curated fallback resources');
+        const skillResources = getFallbackResources(skillName, 3);
+        if (skillResources && skillResources.length > 0) {
+          recommendations = recommendations.concat(skillResources);
+        }
+      }
+    } else {
+      console.warn('YouTube API key not available, using curated resources');
+      const skillResources = getFallbackResources(skillName, 5);
+      if (skillResources && skillResources.length > 0) {
+        recommendations = recommendations.concat(skillResources);
+      }
     }
+  } catch (youtubeError) {
+    console.error('Error fetching YouTube recommendations:', youtubeError);
+    // Fallback to curated resources on error
+    console.log('Using fallback resources due to YouTube API error');
+    const skillResources = getFallbackResources(skillName, 5);
+    if (skillResources && skillResources.length > 0) {
+      recommendations = recommendations.concat(skillResources);
+    }
+  }
     
     // Add Coursera courses to recommendations
     try {
@@ -933,9 +987,11 @@ const getRecommendationsForSkill = async (skillName) => {
       // Continue with what we have
     }
     
-    // If we don't have any recommendations at this point, return empty array
+    // If we don't have any recommendations at this point, use fallback resources
     if (recommendations.length === 0) {
-      return [];
+      console.log(`No API results found for skill: ${skillName}, using fallback resources`);
+      const fallbackResources = getFallbackResources(skillName, 5);
+      recommendations = fallbackResources;
     }
     
     // Categorize and label resources by their source
@@ -944,8 +1000,9 @@ const getRecommendationsForSkill = async (skillName) => {
     return recommendations;
   } catch (error) {
     console.error('Error getting skill recommendations:', error);
-    // Return empty array instead of fallback
-    return [];
+    // Return fallback resources when there's an error
+    console.log(`Error occurred for skill: ${skillName}, using fallback resources`);
+    return getFallbackResources(skillName, 5);
   }
 };
 
@@ -996,6 +1053,8 @@ const searchYouTube = async (query, maxResults = 10) => {
       return getFallbackResources(query, maxResults);
     }
 
+    console.log(`Searching YouTube for: "${query}" with maxResults: ${maxResults}`);
+
     const response = await axios.get(`${YOUTUBE_API_URL}/search`, {
       params: {
         part: 'snippet',
@@ -1004,8 +1063,11 @@ const searchYouTube = async (query, maxResults = 10) => {
         maxResults: maxResults,
         order: 'relevance',
         key: YOUTUBE_API_KEY
-      }
+      },
+      timeout: 10000
     });
+
+    console.log(`YouTube search returned ${response.data.items?.length || 0} results`);
 
     if (!response.data.items || response.data.items.length === 0) {
       console.warn('No YouTube results found, returning fallback resources');
@@ -1231,6 +1293,162 @@ const getFallbackResources = (query, maxResults = 10) => {
         source: "Documentation",
         qualityIndicator: "Essential"
       }
+    ],
+    java: [
+      {
+        title: "Java Programming Tutorial for Beginners",
+        url: "https://www.youtube.com/watch?v=eIrMbAQSU34",
+        author: "Programming with Mosh",
+        description: "Learn Java programming from scratch in this comprehensive guide for beginners.",
+        thumbnail: "https://i.ytimg.com/vi/eIrMbAQSU34/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "5.2M+",
+        formattedDuration: "2:30:45",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "Java Full Course 2024",
+        url: "https://www.youtube.com/watch?v=CFD9EFcNZTQ",
+        author: "freeCodeCamp.org",
+        description: "Complete Java course covering core concepts, OOP, and advanced features.",
+        thumbnail: "https://i.ytimg.com/vi/CFD9EFcNZTQ/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "1.8M+",
+        formattedDuration: "12:00:00",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "Oracle Java Documentation",
+        url: "https://docs.oracle.com/en/java/",
+        author: "Oracle",
+        description: "Official Java documentation with tutorials, API references, and best practices.",
+        thumbnail: "https://www.oracle.com/a/ocom/img/rc24/java-logo-vert-blk.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
+    ],
+    git: [
+      {
+        title: "Git and GitHub for Beginners - Crash Course",
+        url: "https://www.youtube.com/watch?v=RGOj5yH7evk",
+        author: "freeCodeCamp.org",
+        description: "Learn Git and GitHub in this complete crash course for beginners.",
+        thumbnail: "https://i.ytimg.com/vi/RGOj5yH7evk/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "2.1M+",
+        formattedDuration: "1:08:47",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "Git Tutorial for Beginners: Learn Git in 1 Hour",
+        url: "https://www.youtube.com/watch?v=8JJ101D3knE",
+        author: "Programming with Mosh",
+        description: "Complete Git tutorial for beginners - master version control.",
+        thumbnail: "https://i.ytimg.com/vi/8JJ101D3knE/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "3.4M+",
+        formattedDuration: "1:09:13",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "Git Documentation",
+        url: "https://git-scm.com/docs",
+        author: "Git Team",
+        description: "Official Git documentation with commands, tutorials, and best practices.",
+        thumbnail: "https://git-scm.com/images/logo@2x.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
+    ],
+    sql: [
+      {
+        title: "SQL Tutorial - Full Database Course for Beginners",
+        url: "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+        author: "freeCodeCamp.org",
+        description: "Learn SQL and database management in this comprehensive course for beginners.",
+        thumbnail: "https://i.ytimg.com/vi/HXV3zeQKqGY/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "9.8M+",
+        formattedDuration: "4:20:44",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "MySQL Tutorial for Beginners",
+        url: "https://www.youtube.com/watch?v=7S_tz1z_5bA",
+        author: "Programming with Mosh",
+        description: "Learn MySQL database management from scratch.",
+        thumbnail: "https://i.ytimg.com/vi/7S_tz1z_5bA/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "4.2M+",
+        formattedDuration: "3:10:47",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "W3Schools SQL Tutorial",
+        url: "https://www.w3schools.com/sql/",
+        author: "W3Schools",
+        description: "Comprehensive SQL tutorial with examples and exercises.",
+        thumbnail: "https://www.w3schools.com/images/w3schools_logo_436_2.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
+    ],
+    docker: [
+      {
+        title: "Docker Tutorial for Beginners - A Full DevOps Course",
+        url: "https://www.youtube.com/watch?v=3c-iBn73dDE",
+        author: "TechWorld with Nana",
+        description: "Learn Docker from scratch in this comprehensive DevOps course.",
+        thumbnail: "https://i.ytimg.com/vi/3c-iBn73dDE/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "5.1M+",
+        formattedDuration: "2:31:58",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "Docker Documentation",
+        url: "https://docs.docker.com/",
+        author: "Docker Inc.",
+        description: "Official Docker documentation with guides, references, and tutorials.",
+        thumbnail: "https://docs.docker.com/assets/images/docs@2x.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
+    ],
+    mongodb: [
+      {
+        title: "MongoDB Complete Course",
+        url: "https://www.youtube.com/watch?v=c2M-rlkkT5o",
+        author: "Bogdan Stashchuk",
+        description: "Learn MongoDB database from scratch with hands-on examples.",
+        thumbnail: "https://i.ytimg.com/vi/c2M-rlkkT5o/hqdefault.jpg",
+        type: "video",
+        source: "YouTube",
+        formattedViews: "1.2M+",
+        formattedDuration: "8:44:49",
+        qualityIndicator: "Highly Recommended"
+      },
+      {
+        title: "MongoDB Documentation",
+        url: "https://docs.mongodb.com/",
+        author: "MongoDB Inc.",
+        description: "Official MongoDB documentation with tutorials and API references.",
+        thumbnail: "https://webassets.mongodb.com/_com_assets/cms/mongodb_logo1-76twgcu2dm.png",
+        type: "documentation",
+        source: "Documentation",
+        qualityIndicator: "Essential"
+      }
     ]
   };
 
@@ -1263,16 +1481,46 @@ const getFallbackResources = (query, maxResults = 10) => {
   // Find matching resources based on query
   let matchedResources = [];
   
-  // Check for specific technology matches
+  // Check for specific technology matches (more flexible matching)
   for (const [tech, resources] of Object.entries(fallbackResourcesDB)) {
-    if (normalizedQuery.includes(tech) || tech.includes(normalizedQuery)) {
+    // Check for partial matches and common variations
+    const techVariations = [tech];
+    
+    // Add common variations
+    if (tech === 'javascript') techVariations.push('js', 'ecmascript');
+    if (tech === 'python') techVariations.push('py');
+    if (tech === 'java') techVariations.push('java core', 'jdk');
+    if (tech === 'nodejs') techVariations.push('node.js', 'node js', 'express');
+    if (tech === 'react') techVariations.push('reactjs', 'react.js');
+    if (tech === 'git') techVariations.push('github', 'version control');
+    if (tech === 'sql') techVariations.push('mysql', 'postgresql', 'database');
+    if (tech === 'mongodb') techVariations.push('mongo', 'nosql');
+    
+    // Check if query matches any variation
+    const isMatch = techVariations.some(variation => 
+      normalizedQuery.includes(variation) || 
+      variation.includes(normalizedQuery) ||
+      normalizedQuery.replace(/\s+/g, '').includes(variation.replace(/\s+/g, ''))
+    );
+    
+    if (isMatch) {
       matchedResources = [...matchedResources, ...resources];
+      break; // Return first match to avoid duplicates
     }
   }
 
   // If no specific matches found, use default
   if (matchedResources.length === 0) {
-    matchedResources = defaultTech;
+    // Try to provide relevant default based on context
+    if (normalizedQuery.includes('web') || normalizedQuery.includes('frontend')) {
+      matchedResources = [...fallbackResourcesDB.javascript, ...fallbackResourcesDB.html, ...fallbackResourcesDB.css].slice(0, 3);
+    } else if (normalizedQuery.includes('backend') || normalizedQuery.includes('server')) {
+      matchedResources = [...fallbackResourcesDB.nodejs, ...fallbackResourcesDB.python, ...fallbackResourcesDB.java].slice(0, 3);
+    } else if (normalizedQuery.includes('database') || normalizedQuery.includes('data')) {
+      matchedResources = [...fallbackResourcesDB.sql, ...fallbackResourcesDB.mongodb].slice(0, 3);
+    } else {
+      matchedResources = defaultTech;
+    }
   }
 
   return matchedResources.slice(0, maxResults);

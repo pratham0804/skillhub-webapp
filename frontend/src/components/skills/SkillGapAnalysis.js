@@ -128,15 +128,15 @@ const SkillGapAnalysis = () => {
       isComponentVisible.current = !document.hidden;
       if (!document.hidden && isAuthenticated) {
         console.log('👀 Page became visible, refreshing data...');
-        checkAndRefresh();
+        refreshUserProfile(); // Force refresh when page becomes visible
       }
     };
 
     // Listen for focus events (when user returns to window)
     const handleFocus = () => {
       if (isAuthenticated) {
-        console.log('🎯 Window gained focus, checking for updates...');
-        checkAndRefresh();
+        console.log('🎯 Window gained focus, refreshing data...');
+        refreshUserProfile(); // Refresh data when window gains focus
       }
     };
 
@@ -193,6 +193,23 @@ const SkillGapAnalysis = () => {
     }
   }, [isAuthenticated, currentUser, fetchRecommendedSkills]);
 
+  // Listen for profile updates to refresh data automatically
+  useEffect(() => {
+    const handleProfileUpdate = async () => {
+      if (isAuthenticated) {
+        console.log('📝 Profile updated, refreshing skill gap data...');
+        await refreshUserProfile();
+      }
+    };
+
+    // Listen for custom profile update events
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
+  }, [isAuthenticated]);
+
   // Handle target role form submission
   const handleTargetRoleChange = async (e) => {
     e.preventDefault();
@@ -213,6 +230,13 @@ const SkillGapAnalysis = () => {
       if (response.data.status === 'success') {
         // Fetch recommended skills for the new role
         await fetchRecommendedSkills(targetRole.trim());
+        
+        // Trigger profile update event for other components
+        window.dispatchEvent(new CustomEvent('profileUpdated'));
+        
+        // Also update localStorage to notify other tabs
+        localStorage.setItem('profileUpdated', Date.now().toString());
+        setTimeout(() => localStorage.removeItem('profileUpdated'), 1000);
       }
     } catch (error) {
       console.error('Error updating target role:', error);
@@ -372,6 +396,8 @@ const SkillGapAnalysis = () => {
               onChange={(e) => setTargetRole(e.target.value)}
               placeholder="e.g., Frontend Developer, Data Scientist"
               className="target-role-input"
+              disabled={loading}
+              autoComplete="off"
             />
           </div>
           <button type="submit" disabled={loading} className="primary-button">
@@ -440,14 +466,6 @@ const SkillGapAnalysis = () => {
       <div className="your-skills-section">
         <div className="skills-header">
         <h3>Your Skills</h3>
-          <button 
-            onClick={refreshUserProfile}
-            disabled={loading}
-            className="refresh-btn"
-            title="Refresh skills data"
-          >
-            {loading ? '⟳' : '🔄'} Refresh
-          </button>
         </div>
         {userSkills.length > 0 ? (
           <>

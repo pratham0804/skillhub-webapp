@@ -16,8 +16,20 @@ const ResumeUpload = () => {
   const [addSkillsSuccess, setAddSkillsSuccess] = useState(false);
   const [addedSkills, setAddedSkills] = useState([]);
 
-  // Fetch resume data on component mount
+  // Clear resume data on component mount to ensure fresh state
   useEffect(() => {
+    // Reset all state when component mounts to prevent data persistence
+    setResumeData(null);
+    setSkillComparison(null);
+    setFile(null);
+    setFileName('');
+    setError(null);
+    setSuccess(false);
+    setAddingSkills(false);
+    setSkillsToAdd([]);
+    setAddSkillsSuccess(false);
+    setAddedSkills([]);
+    
     const fetchResumeData = async () => {
       try {
         setLoading(true);

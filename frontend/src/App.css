@@ -3729,9 +3729,13 @@
 
 /* Mobile Auth Section */
 .mobile-auth-section {
-  padding: 20px 0;
+  padding: 15px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin-top: auto;
+  position: sticky;
+  bottom: 0;
+  background: rgba(76, 29, 149, 0.95);
+  backdrop-filter: blur(10px);
 }
 
 .mobile-user-info {
@@ -3912,21 +3916,37 @@
   .hero-image {
     margin: 20px auto 0; /* Reduced top margin */
     order: 2; /* Image appears second */
-    padding: 0 10px; /* Add some padding to prevent edge touching */
+    padding: 0; /* Remove side padding */
     width: 100%; /* Full width */
     flex: none; /* Don't use flex sizing */
     display: flex;
     justify-content: center;
+    align-items: center;
+    text-align: center; /* Ensure center alignment */
   }
 
   .image-container {
-    max-width: 320px; /* Increased from 200px for better visibility */
-    margin: 0 auto;
-    width: 100%;
-    padding: 1.5rem; /* Added padding for better appearance */
+    max-width: 300px; /* Optimized for mobile */
+    margin: 0 auto; /* Center the container */
+    width: 90%; /* Slightly smaller than full width */
+    padding: 1.5rem;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border-radius: 1.5rem;
+    display: block; /* Use block instead of flex */
+    /* Remove complex positioning */
+  }
+
+  .image-container img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    max-width: 100%;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .image-container {
     border: 1px solid rgba(255, 255, 255, 0.2);
     /* Hide initially on mobile for scroll animation */
     opacity: 0;
@@ -4066,7 +4086,15 @@
   }
 
   .mobile-nav {
-    padding: 70px 15px 15px;
+    padding: 70px 15px 0;
+    max-height: 100vh;
+    overflow-y: hidden;
+  }
+
+  .mobile-nav-links {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    padding-bottom: 10px;
   }
 
   .mobile-nav-links a {
@@ -4075,12 +4103,19 @@
   }
 
   .mobile-auth-section {
-    padding: 15px 0;
+    padding: 12px 0;
+    position: sticky;
+    bottom: 0;
+    background: rgba(76, 29, 149, 0.98);
+    backdrop-filter: blur(15px);
+    border-top: 2px solid rgba(255, 255, 255, 0.15);
+    margin-top: auto;
   }
 
   .mobile-user-greeting {
     font-size: 1rem;
     padding: 8px;
+    margin-bottom: 8px;
   }
 
   .mobile-logout-btn,

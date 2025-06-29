@@ -118,7 +118,7 @@ const MarketPulse = ({ skillsData }) => {
 
   return (
     <div className="flex items-center space-x-3">
-      <div className={`w-4 h-4 rounded-full animate-pulse ${pulseIntensity > 60 ? 'bg-green-500' : pulseIntensity > 30 ? 'bg-yellow-500' : 'bg-red-500'}`} />
+      <div className={`w-4 h-4 rounded-full ${pulseIntensity > 60 ? 'bg-green-500' : pulseIntensity > 30 ? 'bg-yellow-500' : 'bg-red-500'}`} />
       <span className="text-sm font-medium">Market Pulse: {pulseIntensity.toFixed(1)}%</span>
     </div>
   );
@@ -380,15 +380,15 @@ const DataDashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="relative">
-            <RefreshCw className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
-            <Sparkles className="h-6 w-6 text-yellow-500 absolute -top-2 -right-2 animate-pulse" />
+                    <RefreshCw className="h-12 w-12 text-blue-600 mx-auto" />
+        <Sparkles className="h-6 w-6 text-yellow-500 absolute -top-2 -right-2" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800">Loading Community Data...</h2>
           <p className="text-gray-600">Fetching latest insights from Google Sheets</p>
           <div className="flex justify-center space-x-2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
           </div>
         </div>
       </div>
@@ -397,18 +397,18 @@ const DataDashboard = () => {
 
   return (
     <div className={`min-h-screen transition-all duration-500 ${darkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`}>
-      <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} shadow-lg border-b backdrop-blur-sm bg-opacity-95 sticky top-0 z-50`}>
+      <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} shadow-lg border-b backdrop-blur-sm bg-opacity-95`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Brain className="h-10 w-10 text-blue-600 animate-pulse" />
-                <Sparkles className="h-4 w-4 text-yellow-500 absolute -top-1 -right-1 animate-spin" />
+                          <Brain className="h-10 w-10 text-blue-600" />
+          <Sparkles className="h-4 w-4 text-yellow-500 absolute -top-1 -right-1" />
               </div>
               <div>
                 <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center`}>
                   SkillHub Market Intelligence
-                  <Rocket className="h-6 w-6 ml-2 text-orange-500 animate-bounce" />
+                  <Rocket className="h-6 w-6 ml-2 text-orange-500" />
                 </h1>
                 <div className="flex items-center space-x-4 mt-1">
                   <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Real-time market intelligence from community data</p>
@@ -450,7 +450,7 @@ const DataDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <Target className="h-8 w-8 mb-2 animate-bounce" />
+                  <Target className="h-8 w-8 mb-2" />
                   <p className="text-blue-100">Total Skills</p>
                   <p className="text-3xl font-bold">
                     <AnimatedCounter value={stats.totalSkills} />
@@ -465,7 +465,7 @@ const DataDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <Zap className="h-8 w-8 mb-2 animate-pulse" />
+                  <Zap className="h-8 w-8 mb-2" />
                   <p className="text-green-100">Total Tools</p>
                   <p className="text-3xl font-bold">
                     <AnimatedCounter value={stats.totalTools} />
@@ -480,7 +480,7 @@ const DataDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <TrendingUp className="h-8 w-8 mb-2 animate-bounce" />
+                  <TrendingUp className="h-8 w-8 mb-2" />
                   <p className="text-purple-100">High Demand</p>
                   <p className="text-3xl font-bold">
                     <AnimatedCounter value={stats.highDemandSkills} />
@@ -495,7 +495,7 @@ const DataDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <Brain className="h-8 w-8 mb-2 animate-pulse" />
+                  <Brain className="h-8 w-8 mb-2" />
                   <p className="text-orange-100">Rapid Growth</p>
                   <p className="text-3xl font-bold">
                     <AnimatedCounter value={stats.rapidGrowthSkills} />
@@ -512,7 +512,7 @@ const DataDashboard = () => {
           <Card className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} shadow-xl hover:shadow-2xl transition-all duration-300`}>
             <CardHeader>
               <CardTitle className={`flex items-center ${darkMode ? 'text-white' : ''}`}>
-                <DollarSign className="h-5 w-5 mr-2 text-green-600 animate-pulse" />
+                                  <DollarSign className="h-5 w-5 mr-2 text-green-600" />
                 Highest Paying Skills
                 <Sparkles className="h-4 w-4 ml-2 text-yellow-500" />
               </CardTitle>
@@ -552,7 +552,7 @@ const DataDashboard = () => {
           <Card className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} shadow-xl hover:shadow-2xl transition-all duration-300`}>
             <CardHeader>
               <CardTitle className={`flex items-center ${darkMode ? 'text-white' : ''}`}>
-                <Users className="h-5 w-5 mr-2 text-blue-600 animate-pulse" />
+                                  <Users className="h-5 w-5 mr-2 text-blue-600" />
                 Market Demand Distribution
               </CardTitle>
               <CardDescription className={darkMode ? 'text-gray-300' : ''}>
@@ -593,7 +593,7 @@ const DataDashboard = () => {
             <CardTitle className={`flex items-center ${darkMode ? 'text-white' : ''}`}>
               <Database className="h-5 w-5 mr-2 text-purple-600" />
               Skills vs Tools by Category
-              <TrendingUp className="h-4 w-4 ml-2 text-green-500 animate-bounce" />
+                              <TrendingUp className="h-4 w-4 ml-2 text-green-500" />
             </CardTitle>
             <CardDescription className={darkMode ? 'text-gray-300' : ''}>
               Comparative analysis of skills and tools across different categories

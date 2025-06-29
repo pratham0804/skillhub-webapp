@@ -270,15 +270,6 @@ const SkillResources = ({ skillName, isVisible = true, onToggle = () => {} }) =>
       {error && (
         <div className="error-state">
           <p className="error-message">⚠ {error}</p>
-          <button 
-            className="retry-button" 
-            onClick={() => {
-              setFetchAttempted(false);
-              fetchResources();
-            }}
-          >
-            🔄 Try Again
-          </button>
         </div>
       )}
 
