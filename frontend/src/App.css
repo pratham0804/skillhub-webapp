@@ -412,11 +412,13 @@
   align-items: center;
   justify-content: center;
   padding: 2rem 0;
+  margin-left: 2px; /* Move slightly to the right on desktop */
 }
 
 .image-container {
   max-width: 320px; /* Increased from 200px for better visibility */
   margin: 0 auto;
+  margin-left: 4px; /* Move slightly to the right */
   width: 100%;
   padding: 1.5rem; /* Added padding for better appearance */
   background: rgba(255, 255, 255, 0.1);
@@ -3927,7 +3929,8 @@
 
   .image-container {
     max-width: 300px; /* Optimized for mobile */
-    margin: 0 auto; /* Center the container */
+    margin: 0 auto;
+    margin-left: 3px; /* Move to the right on mobile screens */
     width: 90%; /* Slightly smaller than full width */
     padding: 1.5rem;
     background: rgba(255, 255, 255, 0.1);
@@ -4082,6 +4085,8 @@
   /* Smaller image for very small screens */
   .image-container {
     max-width: 280px;
+    margin: 0 auto;
+    margin-left: 3px; /* Move to the right on small mobile screens */
     padding: 1rem;
   }
 
