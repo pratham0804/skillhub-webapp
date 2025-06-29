@@ -76,6 +76,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Optimize mongoose settings for better performance
+mongoose.set('bufferCommands', false); // Disable mongoose buffering
+mongoose.set('bufferMaxEntries', 0); // Disable mongoose buffering
+
 // MongoDB Connection with optimized settings for fast authentication
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
@@ -84,10 +88,6 @@ mongoose.connect(process.env.MONGODB_URI, {
   maxPoolSize: 10, // Maintain up to 10 socket connections
   serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
   socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-  bufferMaxEntries: 0, // Disable mongoose buffering
-  bufferCommands: false, // Disable mongoose buffering
-  // Enable compression for faster data transfer
-  compressors: 'zlib',
   // Optimize for authentication speed
   connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
   heartbeatFrequencyMS: 10000, // Check connection health every 10 seconds
