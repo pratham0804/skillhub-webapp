@@ -54,11 +54,14 @@ const SkillGapAnalysis = () => {
   }, [currentUser]);
   
   // Refresh user profile data
-  const refreshUserProfile = async () => {
+  const refreshUserProfile = async (isBackgroundRefresh = false) => {
     if (!isAuthenticated) return;
       
       try {
-        setLoading(true);
+        // Only show loading spinner for user-initiated actions, not background refreshes
+        if (!isBackgroundRefresh) {
+          setLoading(true);
+        }
         const response = await api.get('/users/profile');
       if (response.data.status === 'success') {
         const userData = response.data.data.user;
@@ -66,23 +69,31 @@ const SkillGapAnalysis = () => {
         setTargetRole(userData.targetRole || '');
         console.log('✅ Refreshed user profile:', {
           skillsCount: userData.existingSkills?.length || 0,
-          targetRole: userData.targetRole
+          targetRole: userData.targetRole,
+          isBackground: isBackgroundRefresh
         });
         }
       } catch (error) {
       console.error('Error refreshing profile:', error);
-      setError('Failed to refresh profile data');
+      if (!isBackgroundRefresh) {
+        setError('Failed to refresh profile data');
+      }
       } finally {
+        if (!isBackgroundRefresh) {
           setLoading(false);
+        }
     }
   };
 
   // Fetch recommended skills for the target role
-  const fetchRecommendedSkills = useCallback(async (role = targetRole) => {
+  const fetchRecommendedSkills = useCallback(async (role = targetRole, isBackgroundFetch = false) => {
     if (!role) return;
     
     try {
-      setLoading(true);
+      // Only show loading for user-initiated fetches, not background ones
+      if (!isBackgroundFetch) {
+        setLoading(true);
+      }
       setError(null);
       
       console.log(`Fetching recommended skills for role: ${role}`);
@@ -99,25 +110,30 @@ const SkillGapAnalysis = () => {
       }
     } catch (error) {
       console.error('Error fetching recommended skills:', error);
-      setError(`Failed to load recommended skills: ${error.response?.data?.message || error.message}`);
+      if (!isBackgroundFetch) {
+        setError(`Failed to load recommended skills: ${error.response?.data?.message || error.message}`);
+      }
       setRecommendedSkills([]);
     } finally {
-      setLoading(false);
+      if (!isBackgroundFetch) {
+        setLoading(false);
+      }
     }
-  }, [api, targetRole]);
+  }, [api]);
 
   // Auto-refresh functionality - listen for visibility changes and profile updates
   useEffect(() => {
     let refreshInterval;
+    let lastFocusTime = 0;
     
     // Function to check if we should refresh data
     const checkAndRefresh = async () => {
       if (isAuthenticated && isComponentVisible.current) {
         const now = Date.now();
-        // Refresh if it's been more than 10 seconds since last refresh
-        if (now - lastRefreshTime.current > 10000) {
+        // Refresh if it's been more than 2 minutes since last refresh
+        if (now - lastRefreshTime.current > 120000) {
           console.log('🔄 Auto-refreshing skill gap data...');
-          await refreshUserProfile();
+          await refreshUserProfile(true); // Background refresh
           lastRefreshTime.current = now;
         }
       }
@@ -127,17 +143,29 @@ const SkillGapAnalysis = () => {
     const handleVisibilityChange = () => {
       isComponentVisible.current = !document.hidden;
       if (!document.hidden && isAuthenticated) {
-        console.log('👀 Page became visible, refreshing data...');
-        refreshUserProfile(); // Force refresh when page becomes visible
+        const now = Date.now();
+        // Only refresh if it's been more than 30 seconds since last refresh
+        if (now - lastRefreshTime.current > 30000) {
+          console.log('👀 Page became visible, refreshing data...');
+          refreshUserProfile(true); // Background refresh
+          lastRefreshTime.current = now;
+        }
       }
     };
 
-    // Listen for focus events (when user returns to window)
+    // Listen for focus events (when user returns to window) - with throttling
     const handleFocus = () => {
-      if (isAuthenticated) {
-        console.log('🎯 Window gained focus, refreshing data...');
-        refreshUserProfile(); // Refresh data when window gains focus
-      }
+      const now = Date.now();
+      // Only refresh if it's been more than 10 seconds since last focus refresh
+      // and not within 5 seconds of last refresh to prevent input interference
+             if (isAuthenticated && 
+           now - lastFocusTime > 10000 && 
+           now - lastRefreshTime.current > 5000) {
+         console.log('🎯 Window gained focus, refreshing data...');
+         refreshUserProfile(true); // Background refresh
+         lastFocusTime = now;
+         lastRefreshTime.current = now;
+       }
     };
 
     // Listen for localStorage changes (when profile is updated in another tab)
@@ -155,8 +183,8 @@ const SkillGapAnalysis = () => {
     window.addEventListener('focus', handleFocus);
     window.addEventListener('storage', handleStorageChange);
     
-    // Set up interval to check periodically (every 30 seconds)
-    refreshInterval = setInterval(checkAndRefresh, 30000);
+    // Set up interval to check periodically (every 5 minutes instead of 30 seconds)
+    refreshInterval = setInterval(checkAndRefresh, 300000);
 
     // Cleanup
     return () => {
@@ -198,7 +226,7 @@ const SkillGapAnalysis = () => {
     const handleProfileUpdate = async () => {
       if (isAuthenticated) {
         console.log('📝 Profile updated, refreshing skill gap data...');
-        await refreshUserProfile();
+        await refreshUserProfile(true); // Background refresh
       }
     };
 
@@ -396,7 +424,6 @@ const SkillGapAnalysis = () => {
               onChange={(e) => setTargetRole(e.target.value)}
               placeholder="e.g., Frontend Developer, Data Scientist"
               className="target-role-input"
-              disabled={loading}
               autoComplete="off"
             />
           </div>

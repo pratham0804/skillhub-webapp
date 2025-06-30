@@ -23,7 +23,7 @@ const Login = () => {
     const requiredFields = ['username', 'targetRole', 'location', 'experience', 'bio'];
     return requiredFields.every(field => user[field] && user[field].trim() !== '');
   };
-
+  
   const isMobileView = () => {
     return window.innerWidth <= 768;
   };
